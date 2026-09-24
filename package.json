@@ -5,7 +5,7 @@
   "description": "Visor de Monitoreo de Control, Ejecución y Proyección SAF/SPYCG — SLEP Petorca",
   "type": "module",
   "scripts": {
-    "test": "node --test test/",
+    "test": "node --test test/normalizer.test.mjs test/logica.test.mjs test/integracion.test.mjs",
     "test:integracion": "node --test test/integracion.test.mjs",
     "test:reglas": "cd docs/privado && firebase emulators:exec --only firestore --project demo-visor \"node --test firestore.rules.test.mjs\""
   },
