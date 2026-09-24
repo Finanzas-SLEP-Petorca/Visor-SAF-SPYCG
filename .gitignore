@@ -1,0 +1,20 @@
+# Datos y documentos internos: nunca versionar
+docs/privado/
+data/
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+.env
+.env.*
+# JSON: solo los de configuración del proyecto
+*.json
+!package.json
+!package-lock.json
+!firebase.json
+!.firebaserc
+# Dependencias y emulador
+node_modules/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
