@@ -1,6 +1,6 @@
 // Fixtures SINTÉTICOS: datos inventados que reproducen cada anomalía conocida de las
 // planillas reales, sin usar ninguna cifra ni texto real. Se generan en memoria.
-import * as XLSX from '@e965/xlsx';
+import * as XLSX from 'xlsx';
 
 const MESES = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO',
   'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];

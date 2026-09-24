@@ -12,7 +12,7 @@ import { readFileSync, existsSync, readdirSync, statSync, copyFileSync, mkdtempS
 import { join, dirname, basename } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import * as XLSX from '@e965/xlsx';
+import * as XLSX from 'xlsx';
 import { normalizarPlanilla, PATRON_ARCHIVO_UNIDAD } from '../src/normalizer.js';
 import { normalizarSEP, detectarVinculos, PATRON_ARCHIVO_SEP } from '../src/normalizer-sep.js';
 

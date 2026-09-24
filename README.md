@@ -39,7 +39,9 @@ Unidades requirentes ─ editan ─► Planillas Excel en SharePoint (el Visor n
 | `test/` | Pruebas con fixtures **sintéticos** y prueba de integración opcional |
 
 Librerías por CDN: Firebase 10.12.0 (gstatic.com) y SheetJS 0.20.3 (cdn.sheetjs.com, CDN oficial;
-la versión 0.18.5 publicada en cdnjs/npm tiene vulnerabilidades conocidas). Los gráficos son SVG propios.
+la versión 0.18.5 publicada en cdnjs/npm tiene vulnerabilidades conocidas). El agente local y las pruebas
+instalan SheetJS desde el mismo origen oficial (`https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz`).
+Los gráficos son SVG propios.
 
 ## Acceso y roles
 

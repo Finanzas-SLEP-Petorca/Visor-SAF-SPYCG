@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSy
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
-import * as XLSX from '@e965/xlsx';
+import * as XLSX from 'xlsx';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, connectAuthEmulator } from 'firebase/auth';
 import { getFirestore, doc, collection, writeBatch, serverTimestamp, terminate, connectFirestoreEmulator } from 'firebase/firestore';

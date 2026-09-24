@@ -19,7 +19,7 @@
     "firebase-tools": "^15.31.0"
   },
   "dependencies": {
-    "@e965/xlsx": "^0.20.3",
-    "firebase": "^12.19.0"
+    "firebase": "^12.19.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
