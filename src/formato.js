@@ -16,8 +16,8 @@ export function clpCorto(n) {
   return clp(n);
 }
 
-/** "aaaa-mm-dd" → "dd-mm-aaaa". */
-export const fecha = (iso) => (iso ? String(iso).slice(0, 10).split('-').reverse().join('-') : '—');
+/** "aaaa-mm-dd" → "dd-mm-aaaa" (escapado: el texto puede venir de parámetros editables). */
+export const fecha = (iso) => (iso ? esc(String(iso).slice(0, 10).split('-').reverse().join('-')) : '—');
 
 /** Timestamp de Firestore, Date o ISO → Date. */
 export function aDate(v) {

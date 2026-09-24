@@ -7,6 +7,7 @@ import {
 import { PARAMETROS_DEFECTO, mezclarParametros } from '../src/parametros-default.js';
 import { conciliar, entradasHistorial } from '../src/conciliacion.js';
 import { MESES } from '../src/util.js';
+import { fecha } from '../src/formato.js';
 
 const P = mezclarParametros({ valorUTM: 70000 });
 const FER = new Set(P.feriados);
@@ -33,6 +34,16 @@ test('parámetros: mezcla profunda sobre los valores por defecto', () => {
   assert.equal(p.duraciones.compraAgil.entrega, 15);
   assert.equal(p.duraciones.licitacionLR.dias, 60);
   assert.equal(PARAMETROS_DEFECTO.duraciones.compraAgil.dias, 10);
+  const malo = mezclarParametros({ mesCorte: '<img src=x>', fechaCorteDevengo: '<b>', valorUTM: 'x', hitos: [{ fecha: '<i>', nombre: 'x' }] });
+  assert.equal(malo.mesCorte, 8);
+  assert.equal(malo.fechaCorteDevengo, '2026-12-15');
+  assert.equal(malo.valorUTM, null);
+  assert.equal(malo.hitos.length, 0);
+});
+
+test('formato: fechas escapadas', () => {
+  assert.equal(fecha('2026-10-09'), '09-10-2026');
+  assert.ok(!fecha('<img src=x onerror=1>').includes('<'));
 });
 
 // ---------------------------------------------------------------- fixtures de compras sintéticas

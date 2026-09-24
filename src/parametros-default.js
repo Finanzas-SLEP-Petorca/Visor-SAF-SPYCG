@@ -92,7 +92,29 @@ export function mezclarParametros(guardados) {
       out[k] = mezclarObj(out[k], v);
     } else if (v !== undefined) out[k] = v;
   }
-  return out;
+  return sanear(out);
+}
+
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
+const numero = (v, d, min = -Infinity, max = Infinity) => (Number.isFinite(Number(v)) && v !== null && v !== '' ? Math.min(max, Math.max(min, Number(v))) : d);
+
+/** Los parámetros los editan varios roles: se validan tipos antes de usarlos (defensa en profundidad). */
+function sanear(p) {
+  const D = PARAMETROS_DEFECTO;
+  p.fechaCorteDevengo = ISO.test(p.fechaCorteDevengo) ? p.fechaCorteDevengo : D.fechaCorteDevengo;
+  p.mesCorte = Math.round(numero(p.mesCorte, D.mesCorte, 1, 12));
+  p.valorUTM = p.valorUTM === null ? null : numero(p.valorUTM, null, 0);
+  for (const k of ['umbralAmarillo', 'diasFrescura', 'umbralProcesosSemana']) p[k] = numero(p[k], D[k], 0);
+  p.umbralSimilitud = numero(p.umbralSimilitud, D.umbralSimilitud, 0, 1);
+  p.feriados = (Array.isArray(p.feriados) ? p.feriados : D.feriados).filter((f) => ISO.test(f));
+  p.hitos = (Array.isArray(p.hitos) ? p.hitos : D.hitos).filter((h) => h && ISO.test(h.fecha)).map((h) => ({ ...h, nombre: String(h.nombre ?? ''), responsable: String(h.responsable ?? '') }));
+  p.ventanas = (Array.isArray(p.ventanas) ? p.ventanas : D.ventanas).filter((v) => v && ISO.test(v.fin)).map((v) => ({ ...v, id: String(v.id ?? ''), nombre: String(v.nombre ?? '') }));
+  for (const [key, d] of Object.entries(p.duraciones || {})) {
+    if (!d || typeof d !== 'object') { p.duraciones[key] = structuredClone(D.duraciones[key] || { dias: 30, entrega: 15 }); continue; }
+    for (const [c, val] of Object.entries(d)) d[c] = numero(val, D.duraciones[key]?.[c] ?? 0, 0);
+  }
+  for (const [esc, f] of Object.entries(p.factores || {})) for (const [k, val] of Object.entries(f || {})) f[k] = numero(val, D.factores[esc]?.[k] ?? 0, 0, 1);
+  return p;
 }
 function mezclarObj(a, b) {
   const o = { ...a };

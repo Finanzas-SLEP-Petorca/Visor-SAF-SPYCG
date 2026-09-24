@@ -66,7 +66,7 @@ function filaHTML(c, ctx) {
   const contactos = ctx.estado.contactos.filter((x) => x.compraId === c.id);
   const ultC = contactos.map((x) => x.fecha).filter(Boolean).sort().pop() || g.compras_fechaUltimoContacto;
   const tieneC = contactos.length > 0 || g.compras_contactoRealizado;
-  const motivos = c.s.motivos.map((m) => m.texto).join('<br>');
+  const motivos = c.s.motivos.map((m) => esc(m.texto)).join('<br>');
   return `<tr data-id="${esc(c.id)}"${flash ? ' class="flash"' : ''}>
     <td class="col-fija nowrap"><button class="chico" data-abrir="${esc(c.id)}" title="Abrir detalle">${esc(c.id)}</button>${flash ? `<span class="editado-por">editado por ${esc(nombreDe(rec.por))}</span>` : ''}</td>
     <td>${esc(c.unidad)}</td><td>${esc(c.programa || '')}</td><td>${esc(c.subtitulo || '')}</td><td>${esc(c.asignacion || '')}</td>
