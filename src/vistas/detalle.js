@@ -6,6 +6,7 @@ import { ROLES_OBS, ROLES } from '../parametros-default.js';
 import { MESES } from '../util.js';
 import { esc, clp, fecha, fechaHora, pct } from '../formato.js';
 import { semaforo, etapa, opciones, toast, nombreRol } from '../ui.js';
+import { exportarCompraExcel, imprimirCompra } from './exportar.js';
 
 const dlg = () => document.getElementById('detalle');
 let abierto = null; // { id, desuscribir, extra }
@@ -27,6 +28,24 @@ function cerrar() {
   abierto = null;
 }
 dlg().addEventListener('close', cerrar);
+
+/** Cierra el detalle; si hay cambios escritos sin guardar, pregunta antes. */
+function intentarCerrar() {
+  if (sucio && !window.confirm('Hay cambios sin guardar en esta compra. ¿Cerrar de todos modos?')) return;
+  sucio = false;
+  dlg().close();
+}
+// Clic fuera del recuadro (en el fondo oscuro) cierra. Se exige que el clic empiece y termine
+// fuera, para no cerrar al seleccionar texto y soltar el mouse afuera.
+const fuera = (e) => {
+  const r = dlg().getBoundingClientRect();
+  return e.target === dlg() && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom);
+};
+let presionFuera = false;
+dlg().addEventListener('mousedown', (e) => { presionFuera = fuera(e); });
+dlg().addEventListener('click', (e) => { if (presionFuera && fuera(e)) intentarCerrar(); presionFuera = false; });
+// Tecla Esc: misma confirmación si hay cambios sin guardar.
+dlg().addEventListener('cancel', (e) => { if (sucio) { e.preventDefault(); intentarCerrar(); } });
 dlg().addEventListener('input', () => { sucio = true; });
 dlg().addEventListener('click', (e) => {
   const q = e.target.closest('[data-quitar-fuente]');
@@ -126,7 +145,7 @@ function pintar(ctx, conservarScroll = false) {
   const scroll = d.scrollTop;
   if (!c) {
     d.innerHTML = `<div class="cab"><h2 id="detalle-titulo">${esc(abierto.id)}</h2><div class="espacio"></div><button data-cerrar>Cerrar</button></div><div class="cuerpo"><p>La compra ya no existe en la base.</p></div>`;
-    d.querySelector('[data-cerrar]').onclick = () => d.close();
+    d.querySelector('[data-cerrar]').onclick = intentarCerrar;
     return;
   }
   const p = ctx.p;
@@ -138,7 +157,9 @@ function pintar(ctx, conservarScroll = false) {
 
   partes.push(`<div class="cab"><div><h2 id="detalle-titulo" style="margin:0">${esc(c.id)} · ${esc(c.detalle || '')}</h2>
     <div class="small muted">${esc(c.unidad)} · Programa ${esc(c.programa || '—')} · Subt. ${esc(c.subtitulo || '—')} · Asig. ${esc(c.asignacion || '—')}</div></div>
-    <div class="espacio"></div>${semaforo(c.s.color)} ${etapa(c.et)}<button data-cerrar>Cerrar</button></div><div class="cuerpo pila">`);
+    <div class="espacio"></div>${semaforo(c.s.color)} ${etapa(c.et)}
+    <button class="chico" data-exp-xlsx title="Descargar esta compra en Excel">⬇ Excel</button><button class="chico" data-exp-pdf title="Imprimir o guardar esta compra como PDF">⬇ PDF</button>
+    <button data-cerrar title="Cerrar (también con Esc o haciendo clic fuera)">Cerrar</button></div><div class="cuerpo pila">`);
 
   // Alertas
   if (c.s.motivos.length || c.s.etiqueta || c.vinculo) {
@@ -239,7 +260,9 @@ function pintar(ctx, conservarScroll = false) {
 }
 
 function enlazar(d, c, ctx) {
-  d.querySelector('[data-cerrar]').onclick = () => d.close();
+  d.querySelector('[data-cerrar]').onclick = intentarCerrar;
+  d.querySelector('[data-exp-xlsx]').onclick = () => exportarCompraExcel(c, abierto.extra, ctx).catch((e) => toast(`No se pudo exportar: ${e.message}`, true));
+  d.querySelector('[data-exp-pdf]').onclick = () => imprimirCompra(c, abierto.extra, ctx);
   d.querySelectorAll('[data-agregar-fuente]').forEach((btn) => {
     btn.onclick = () => {
       const cont = btn.closest('[data-tipo="fuentes"]');
