@@ -27,7 +27,8 @@ export function render(el, ctx) {
   const riesgo = act.reduce((s, c) => s + montoEnRiesgo(c), 0);
   const condicionado = act.filter((c) => c.pr.condicionado).reduce((s, c) => s + c.pr.planificado, 0);
   const sinDesglose = act.filter((c) => c.desglose && c.m.pac > 0 && MESES.every((m) => !c.desglose[m])).reduce((s, c) => s + c.m.pac, 0);
-  const sinMes = act.reduce((s, c) => s + (c.pr.porMes.probable.SIN_MES || 0), 0);
+  const sep = calc.filter((c) => c.origen === 'SEP');
+  const sepT = sep.reduce((a, c) => ({ pres: a.pres + c.m.pac, adj: a.adj + (c.base.montoAdjudicado || 0), dev: a.dev + c.m.real, vinc: a.vinc + (c.vinculo ? 1 : 0) }), { pres: 0, adj: 0, dev: 0, vinc: 0 });
 
   // Curva acumulada mensual
   const acum = (esc2) => { let s = 0; return MESES.map((m) => { s += act.reduce((a, c) => a + (c.pr.porMes[esc2][m] || 0), 0); return s; }); };
@@ -63,15 +64,16 @@ export function render(el, ctx) {
     ${kpi('% de ejecución', pct(T.pac ? T.real / T.pac : NaN), 'Devengado / PAC')}
     ${kpi('Proyección de cierre (probable)', clpCorto(T.probable), `Conservador ${clpCorto(T.conservador)} · Planificado ${clpCorto(T.planificado)}`)}
     ${kpi('Alertas rojas', String(rojas), `Monto en riesgo ${clpCorto(riesgo)}`)}
+    ${sep.length ? `<a class="tarjeta kpi" href="#fuentes" style="text-decoration:none;color:inherit;border:1px dashed var(--line-2)"><div class="etq">Seguimiento SEP · no suma en los totales</div>
+      <div class="val">${clpCorto(sepT.pres)}</div><div class="det">${sep.length} ítems · adjudicado ${clpCorto(sepT.adj)} · devengado ${clpCorto(sepT.dev)}<br>${sepT.vinc} vinculados a compras de las unidades · ver pestaña SEP</div></a>` : ''}
   </div>
   <details class="supuestos" style="margin-top:.75rem"><summary>Supuestos de la proyección</summary><ul>
     <li>Real: desglose de las planillas hasta el mes ${p.mesCorte} (no cruzado con SIGFE), salvo devengo SIGFE registrado por Finanzas.</li>
     <li>Proyectado: desglose posterior al mes ${p.mesCorte} multiplicado por un factor según etapa y ventana (conservador / probable / planificado): ejecución 1 · adjudicada sin OC ${p.factores.probable.adjudicadaSinOC} · publicada ${p.factores.probable.publicada} · bases ${p.factores.probable.bases} · planificada ${p.factores.probable.planificada} · fuera de ventana ${p.factores.probable.fueraVentana} (valores del escenario probable).</li>
     <li>Corte de devengo ${fecha(p.fechaCorteDevengo)}; duraciones por modalidad referenciales${p.valorUTM ? `; UTM ${clp(p.valorUTM)}` : '; <b>valor UTM no registrado</b> (se asume tramo 100–1.000 UTM)'}.</li>
     <li>Compras con PAC y sin desglose mensual: ${clp(sinDesglose)} (no entran en la proyección).</li>
-    ${sinMes ? `<li>Ítems SEP sin desglose mensual: ${clp(sinMes)} proyectados (probable) sin mes asignado.</li>` : ''}
     <li>Condicionado a definición pendiente (planificado): ${clp(condicionado)}; se muestra aparte y no es seguro.</li>
-    <li>Ítems SEP vinculados a contratos de unidades se cuentan una sola vez (desde la planilla de la unidad).</li></ul></details>
+    <li>El Seguimiento SEP es solo de seguimiento: sus compras se registran en las planillas de las unidades (UATP y otras Subdirecciones), por lo que no suma en los totales del Servicio.</li></ul></details>
   <div class="grilla dos" style="margin-top:1rem">
     <div class="tarjeta"><h3>Curva acumulada mensual (real + proyección)</h3>${curva}${fuenteCifra(ctx)}</div>
     <div class="tarjeta"><h3>Avance del PAC por estado</h3>

@@ -145,7 +145,7 @@ test('proyección en tres escenarios y condicionado', () => {
   assert.equal(r['X-002'].pr.porMes.probable.OCT, 120);
 });
 
-test('vínculo SEP–unidad: no se cuenta dos veces y se puede descartar', () => {
+test('SEP es solo seguimiento: no suma en los totales; el vínculo por OC se detecta y se puede descartar', () => {
   const bases = {
     DOS: base([{ id: 'DOS-001', montoPAC: 5000, ocs: ['1506668-901-SE26'], montoOC: 5000 }], { unidad: 'UNIDAD DOS' }),
     SEP: { unidad: 'SEP', filas: {
@@ -155,11 +155,12 @@ test('vínculo SEP–unidad: no se cuenta dos veces y se puede descartar', () =>
   };
   const r = calc(bases);
   const tot = agregar(r, () => 'Servicio');
-  assert.equal(tot[0].pac, 5000 + 100);
+  assert.equal(tot[0].pac, 5000);
   assert.equal(porId(r)['SEP-001'].vinculo.compraId, 'DOS-001');
   const p2 = mezclarParametros({ valorUTM: 70000, vinculosDescartados: [{ sepId: 'SEP-001', compraId: 'DOS-001' }] });
   const r2 = calc(bases, {}, p2);
-  assert.equal(agregar(r2, () => 'S')[0].pac, 6000);
+  assert.equal(agregar(r2, () => 'S')[0].pac, 5000);
+  assert.equal(porId(r2)['SEP-001'].vinculo, null);
 });
 
 test('reparto por fuente, alertas agrupadas y acciones por Subdirección', () => {

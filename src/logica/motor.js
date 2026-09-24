@@ -45,7 +45,8 @@ export function unificar(bases, gestion = {}, p) {
           id: it.id, origen: 'SEP', unidad: 'SEP', slug, programa: '02', subtitulo: it.subtitulo, asignacion: null,
           detalle: it.item, tipoTexto: it.modalidad, pac: it.montoPresupuestado, montoOC: it.montoAdjudicado,
           ocs: it.ocs || [], desglose: null, obsUnidad: it.observaciones, estadoInferido: null, estadoUnidad: null,
-          base: it, g: gestion[it.id] || {}, vinculo: v || null, enTotales: !v, advertencias: it.advertencias || [],
+          // SEP es solo seguimiento: sus compras se abren en las planillas de las unidades, por eso nunca suman.
+          base: it, g: gestion[it.id] || {}, vinculo: v || null, enTotales: false, advertencias: it.advertencias || [],
         });
       }
       continue;
@@ -423,7 +424,7 @@ const fmt = (iso) => (iso ? iso.split('-').reverse().join('-') : '');
 export function generarAlertas(calc, p, ctx = {}) {
   const out = [];
   for (const c of calc) {
-    if (!c.enTotales && c.origen === 'SEP' && c.vinculo) continue;
+    if (c.origen === 'SEP' && c.vinculo) continue; // el contrato ya se controla desde la planilla de la unidad
     for (const mo of c.s.motivos) {
       if (mo.codigo === 'SIN_FUENTE' || mo.codigo === 'PLANILLA_DESACTUALIZADA') continue; // se agrupan abajo
       out.push({ severidad: mo.nivel === 'rojo' ? 'roja' : 'amarilla', codigo: mo.codigo, compraId: c.id, unidad: c.unidad,

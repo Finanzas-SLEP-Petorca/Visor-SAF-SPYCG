@@ -7,7 +7,7 @@ const G = {
     titulo: 'Resumen ejecutivo',
     que: 'La portada para la Dirección y las Subdirecciones: muestra en un vistazo cuánto se planificó (PAC), cuánto está comprometido, cuánto se ha devengado y cómo se proyecta el cierre 2026.',
     leer: [
-      'Las <b>tarjetas</b> de arriba suman todas las compras del Servicio (los contratos que aparecen en SEP y en una unidad se cuentan una sola vez).',
+      'Las <b>tarjetas</b> de arriba suman las compras de las planillas de las unidades. El Seguimiento SEP aparece en una tarjeta aparte, con borde punteado, y <b>no suma</b>: sus compras se registran en las planillas de las unidades.',
       '<b>Proyección de cierre</b>: tres escenarios. <i>Conservador</i> solo cuenta lo que ya tiene OC o está en ejecución; <i>probable</i> aplica factores según la etapa y la ventana; <i>planificado</i> supone que todo lo programado por las unidades se cumple.',
       'La <b>curva acumulada</b> muestra en línea continua lo real (hasta el mes de corte) y en líneas discontinuas los tres escenarios. Pase el cursor sobre un mes para ver las cifras, o use "Ver tabla".',
       'Abra <b>Supuestos de la proyección</b> para ver qué se asumió: mes de corte, factores, UTM y montos condicionados.',
@@ -49,7 +49,7 @@ const G = {
     leer: [
       'Cada tarjeta muestra PAC, adjudicado, devengado, proyección probable y monto en riesgo de esa fuente. Un contrato con varias fuentes se reparte según los montos indicados.',
       '"Sin clasificar" reúne las compras a las que aún nadie les asignó fuente.',
-      'Pestaña <b>SEP</b>: cada ítem con su fase recalculada (la columna "Etapa actual" de la planilla no se usa), visación UATP, devengado, pagado y el vínculo con el contrato de la unidad (🔗), que evita contarlo dos veces.',
+      'Pestaña <b>SEP</b>: es solo de seguimiento y no suma en los totales. Muestra cada ítem con su fase recalculada (la columna "Etapa actual" de la planilla no se usa), visación UATP, devengado, pagado y el vínculo 🔗 con la compra de la unidad donde se controla',
     ],
     ingresar: 'La fuente se registra en el detalle de cada compra (sección Subdirecciones). Los vínculos SEP propuestos por similitud los confirma o descarta la administración en la pestaña SEP.',
     porRol: {
