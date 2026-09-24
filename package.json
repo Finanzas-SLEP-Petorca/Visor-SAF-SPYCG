@@ -7,15 +7,19 @@
   "scripts": {
     "test": "node --test test/normalizer.test.mjs test/logica.test.mjs test/roles.test.mjs test/integracion.test.mjs",
     "test:integracion": "node --test test/integracion.test.mjs",
-    "test:reglas": "cd docs/privado && firebase emulators:exec --only firestore --project demo-visor \"node --test firestore.rules.test.mjs\""
+    "test:reglas": "cd docs/privado && firebase emulators:exec --only firestore --project demo-visor \"node --test firestore.rules.test.mjs\"",
+    "sync": "node sync/agente-local.mjs",
+    "sync:simular": "node sync/agente-local.mjs --simular"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
-    "@e965/xlsx": "^0.20.3",
     "@firebase/rules-unit-testing": "^5.0.2",
-    "firebase": "^12.19.0",
     "firebase-tools": "^15.31.0"
+  },
+  "dependencies": {
+    "@e965/xlsx": "^0.20.3",
+    "firebase": "^12.19.0"
   }
 }
