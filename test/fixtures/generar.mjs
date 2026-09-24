@@ -19,7 +19,7 @@ export function fila(p) {
   const meses = p.meses || new Array(12).fill(0);
   const total = 'total' in p ? p.total : meses.reduce((a, b) => a + b, 0);
   return [
-    p.nro, p.programa ?? '02', p.c ?? 22, p.d ?? 2204001, p.admin ?? 'Persona Ficticia', p.detalle ?? 'Compra de prueba',
+    p.nro, p.programa ?? '02', 'c' in p ? p.c : 22, 'd' in p ? p.d : 2204001, p.admin ?? 'Persona Ficticia', p.detalle ?? 'Compra de prueba',
     p.temporalidad ?? 'ÚNICO', p.pac ?? 1000000, p.montoOC ?? 0, p.oc ?? null, 'tipo' in p ? p.tipo : 'COMPRA ÁGIL',
     p.valorOT ?? 0, p.avance ?? 0, p.recepcion ?? 0, p.devengado ?? 0, p.pendiente ?? 0,
     p.estado ?? null, ...meses, total, 0, 0, p.obs ?? null,

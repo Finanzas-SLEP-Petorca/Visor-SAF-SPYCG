@@ -25,12 +25,16 @@ test('regla 1: subtítulo/asignación invertidos, deducidos y normales', () => {
   assert.deepEqual(resolverSubtituloAsignacion(2208007, 22), { subtitulo: '22', asignacion: '2208007', ajuste: 'invertido' });
   assert.deepEqual(resolverSubtituloAsignacion(null, '29 06 001'), { subtitulo: '29', asignacion: '2906001', ajuste: 'deducido' });
   assert.deepEqual(resolverSubtituloAsignacion(31, null), { subtitulo: '31', asignacion: null, ajuste: null });
+  assert.deepEqual(resolverSubtituloAsignacion(null, '22'), { subtitulo: '22', asignacion: null, ajuste: null });
   const r = normalizarPlanilla(libroUnidad('UNIDAD UNO', [
     fila({ nro: 1, c: 2204001, d: 22 }), fila({ nro: 2, c: 2906001, d: 29 }), fila({ nro: 3, c: 22, d: '-' }),
+    fila({ nro: 4, c: null, d: '22' }),
   ]), 'ESTATUS DEVENGOS COMPRAS UNIDAD UNO 2026.xlsx');
   assert.ok(r.filas.every((f) => /^\d{2}$/.test(f.subtitulo)));
   assert.equal(cuenta(r, 'SUBT_INVERTIDO'), 2);
-  assert.equal(cuenta(r, 'ASIG_VACIA'), 1);
+  assert.equal(cuenta(r, 'ASIG_VACIA'), 2);
+  assert.equal(r.filas[3].subtitulo, '22');
+  assert.equal(r.filas[3].asignacion, null);
 });
 
 test('regla 2: programa como texto de 2 dígitos', () => {

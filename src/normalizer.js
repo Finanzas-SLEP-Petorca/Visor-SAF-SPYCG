@@ -146,6 +146,7 @@ export function resolverSubtituloAsignacion(c, d) {
   else if (dc >= 4 && dd === 2) { subtitulo = sd; asignacion = sc; ajuste = 'invertido'; }
   else if (dc >= 4 && dd === 0) { asignacion = sc; subtitulo = sc.replace(/\D/g, '').slice(0, 2); ajuste = 'deducido'; }
   else if (dd >= 4 && dc !== 2) { asignacion = sd; subtitulo = sd.replace(/\D/g, '').slice(0, 2); ajuste = 'deducido'; }
+  else if (dc === 0 && dd === 2) { subtitulo = sd; asignacion = null; } // C vacía y D trae el subtítulo
   else { subtitulo = sc || null; asignacion = sd || null; }
   return { subtitulo, asignacion, ajuste };
 }
