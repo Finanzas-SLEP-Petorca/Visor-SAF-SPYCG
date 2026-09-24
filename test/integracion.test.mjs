@@ -81,7 +81,7 @@ test('integración con planillas reales (VISOR_DATA_DIR)', { skip: !DIR && 'VISO
     const archivos = readdirSync(DIR).filter((n) => !n.startsWith('~$'));
     const unidades = archivos.filter((n) => PATRON_ARCHIVO_UNIDAD.test(n));
     const sepRuta = process.env.VISOR_SEP_FILE || (archivos.find((n) => PATRON_ARCHIVO_SEP.test(n)) && join(DIR, archivos.find((n) => PATRON_ARCHIVO_SEP.test(n))));
-    const leer = (ruta) => { const t = join(tmp, basename(ruta)); copyFileSync(ruta, t); return XLSX.readFile(t); };
+    const leer = (ruta) => { const t = join(tmp, basename(ruta)); copyFileSync(ruta, t); return XLSX.read(readFileSync(t), { type: 'buffer' }); };
 
     const res = {};
     for (const n of unidades) {
