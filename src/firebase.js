@@ -6,16 +6,9 @@ import {
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { firebaseConfig as configBase } from './firebase-config.js';
 
-// Configuración pública del proyecto web (no es un secreto: el acceso lo controlan las reglas).
-const firebaseConfig = {
-  apiKey: 'AIzaSyBfYE16R3s3EVfn8A3dEUROJjC1vWdQ118',
-  authDomain: 'slep-petorca-finanzas-permisos.firebaseapp.com',
-  projectId: 'slep-petorca-finanzas-permisos',
-  storageBucket: 'slep-petorca-finanzas-permisos.firebasestorage.app',
-  messagingSenderId: '1032729181983',
-  appId: '1:1032729181983:web:3a33171e171ea6adc4ba2a',
-};
+const firebaseConfig = { ...configBase };
 
 // Solo para desarrollo: http://localhost…/?emulador usa los emuladores locales (proyecto demo).
 export const EMULADOR = ['localhost', '127.0.0.1'].includes(location.hostname) && new URLSearchParams(location.search).has('emulador');
