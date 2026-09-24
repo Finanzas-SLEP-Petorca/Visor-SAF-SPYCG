@@ -12,7 +12,7 @@ const NOMBRES = {
   SUBT_INVERTIDO: 'Subtítulo/asignación invertidos', SUBT_DEDUCIDO: 'Subtítulo deducido', ASIG_VACIA: 'Asignación vacía',
   TIPO_VACIO: 'Tipo de compra vacío', TIPO_CORREGIDO: 'Tipo de compra corregido', TIPO_DISTINTO_OC: 'Tipo distinto al de la OC',
   OC_MONTO_SIN_NUMERO: 'Monto OC sin N° de OC', OC_IGUAL_PAC_TODAS: 'Monto OC = PAC en todas las filas', OC_VARIAS: 'Varias OC en una celda',
-  OC_PREFIJO_PROGRAMA: 'OC de otro programa', DESGLOSE_NO_CUADRA: 'Total de desglose no cuadra', DESGLOSE_VACIO: 'Desglose vacío con PAC',
+  OC_PREFIJO_PROGRAMA: 'OC de otro programa', OC_REPETIDA: 'OC repetida en la celda', COTIZACION_SIN_OC: 'Cotización sin OC', DESGLOSE_NO_CUADRA: 'Total de desglose no cuadra', DESGLOSE_VACIO: 'Desglose vacío con PAC',
   PLANILLA_DESACTUALIZADA: 'Planilla desactualizada', ENCABEZADO_DISTINTO: 'Encabezado distinto al estándar', NRO_VACIO: 'Sin N°',
   NRO_DUPLICADO: 'N° duplicado', MONTO_NO_NUMERICO: 'Monto no numérico', SEP_ADJUDICADA_SIN_MONTO: 'SEP adjudicado sin monto',
   SEP_SIN_VISACION: 'SEP sin visación UATP', SEP_ETAPA_REF: 'SEP: "Etapa actual" con #REF!',

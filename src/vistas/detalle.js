@@ -176,7 +176,7 @@ function pintar(ctx, conservarScroll = false) {
   } else {
     partes.push(`<div class="tarjeta"><h3>Planilla de la unidad (lectura; el Visor nunca la modifica)</h3>
       <div class="form-grid small">${[['Administrador contrato', b.adminContrato], ['Temporalidad', b.temporalidad], ['Tipo de compra', b.tipoCompra || 'Sin definir'],
-        ['Tipo inferido de la OC', b.tipoCompraInferido], ['N° OC', b.ocNoAplica ? 'NO APLICA' : (b.ocs || []).join(', ') || '—'], ['Valor OT', clp(b.valorOT)],
+        ['Tipo inferido de la OC', b.tipoCompraInferido], ['N° OC', b.ocNoAplica ? 'NO APLICA' : (b.ocs || []).join(', ') || '—'], ['ID cotización', b.idMercadoPublico], ['Valor OT', clp(b.valorOT)],
         ['% avance OT', pct(b.avanceOT)], ['Recepción conforme', clp(b.valorRecepcion)], ['Facturado = devengado', clp(b.devengadoPlanilla)],
         ['Pendiente OT', clp(b.pendienteOT)], ['Total desglose', clp(b.totalDesglose)], ['Fila en la planilla', b.fila]]
         .map(([k, v]) => `<div><b>${esc(k)}</b><br>${esc(v ?? '—')}</div>`).join('')}</div>

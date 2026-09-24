@@ -65,18 +65,27 @@ test('regla 3: tipo de compra corregido, vacío e inferido desde la OC', () => {
 test('regla 4: varias OC, separadores, NO APLICA y prefijo de otro programa', () => {
   assert.deepEqual(extraerOCs('1375756-5-SE26 // 1375756-6-CM26 - 1375756-7-AG26').ocs,
     ['1375756-5-SE26', '1375756-6-CM26', '1375756-7-AG26']);
-  assert.deepEqual(extraerOCs('NO APLICA'), { ocs: [], noAplica: true });
+  assert.deepEqual(extraerOCs('NO APLICA'), { ocs: [], cotizaciones: [], repetidas: [], noAplica: true });
+  assert.deepEqual(extraerOCs('1506668-7-COT26'), { ocs: [], cotizaciones: ['1506668-7-COT26'], repetidas: [], noAplica: false });
+  assert.deepEqual(extraerOCs('1375756-8-SE26 // 1375756-8-SE26').repetidas, ['1375756-8-SE26']);
   assert.deepEqual(extraerOCs('1506668-3-L126').ocs, ['1506668-3-L126']);
   const r = normalizarPlanilla(libroUnidad('CUATRO', [
     fila({ nro: 1, programa: '02', oc: '1506668-901-SE26 1506668-902-SE26', montoOC: 5, tipo: 'LICITACIÓN' }),
     fila({ nro: 2, programa: '02', oc: '1375756-9-CM26', montoOC: 5, tipo: 'CONVENIO MARCO' }),
     fila({ nro: 3, programa: '02', oc: null, montoOC: 7 }),
-    fila({ nro: 4, programa: '02', oc: 'NO APLICA' }),
+    fila({ nro: 4, programa: '02', oc: 'NO APLICA', montoOC: 9 }), // consumo sin OC: no es "monto OC sin N°"
+    fila({ nro: 5, programa: '02', oc: '1506668-40-COT26', montoOC: 3 }), // cotización de compra ágil
+    fila({ nro: 6, programa: '02', oc: '1506668-41-SE26 - 1506668-41-SE26', montoOC: 3, tipo: 'LICITACIÓN' }),
   ]), 'ESTATUS DEVENGOS COMPRAS CUATRO 2026.xlsx');
   assert.equal(cuenta(r, 'OC_VARIAS'), 1);
   assert.equal(cuenta(r, 'OC_PREFIJO_PROGRAMA'), 1);
   assert.equal(cuenta(r, 'OC_MONTO_SIN_NUMERO'), 1);
   assert.equal(r.filas[3].ocNoAplica, true);
+  assert.equal(cuenta(r, 'COTIZACION_SIN_OC'), 1);
+  assert.equal(r.filas[4].idMercadoPublico, '1506668-40-COT26');
+  assert.deepEqual(r.filas[4].ocs, []);
+  assert.equal(cuenta(r, 'OC_REPETIDA'), 1);
+  assert.deepEqual(r.filas[5].ocs, ['1506668-41-SE26']);
 });
 
 test('regla 5: montos con formato de texto y guiones', () => {

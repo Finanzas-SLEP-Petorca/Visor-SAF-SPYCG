@@ -9,8 +9,12 @@ export const VERSION_NORMALIZADOR = 1;
 
 export const PATRON_ARCHIVO_UNIDAD = /ESTATUS\s+DEVENGOS\s+COMPRAS\s+(.+?)\s+(20\d{2})\s*\.xls[xm]?$/i;
 
-/** Expresión de OC. Admite sufijo con letra+dígito (L1) además de dos letras. */
-export const PATRON_OC = /\d{6,8}-\d{1,4}-[A-Z][A-Z0-9]\d{2}/g;
+/**
+ * Códigos de Mercado Público: sufijo de 2 o 3 letras (y L1, licitación menor a 100 UTM) más el año.
+ * Un sufijo COT es el ID de cotización de una compra ágil, no una OC.
+ */
+export const PATRON_OC = /\d{6,8}-\d{1,4}-(?:[A-Z]{2,3}|L1)\d{2}/g;
+const esCotizacion = (codigo) => /-COT\d{2}$/.test(codigo);
 
 /** Prefijo de la unidad compradora en Mercado Público → programa. */
 export const PREFIJOS_OC = { '1375756': '01', '1506668': '02' };
@@ -179,17 +183,26 @@ export function normalizarTipoCompra(v) {
   return { tipo, corregido };
 }
 
-/** Regla 4: extrae las OC de una celda. */
+/**
+ * Regla 4: extrae las OC de una celda. Separa los ID de cotización (…-COT26) y detecta
+ * OC repetidas dentro de la misma celda (se cuentan una vez).
+ */
 export function extraerOCs(v) {
-  if (esVacio(v)) return { ocs: [], noAplica: false };
+  if (esVacio(v)) return { ocs: [], cotizaciones: [], repetidas: [], noAplica: false };
   const s = String(v).toUpperCase();
-  const ocs = [...new Set(s.match(PATRON_OC) || [])];
-  const noAplica = ocs.length === 0 && normTxt(s).includes('NO APLICA');
-  return { ocs, noAplica };
+  const todos = s.match(PATRON_OC) || [];
+  const vistos = new Set();
+  const repetidas = new Set();
+  for (const c of todos) { if (vistos.has(c)) repetidas.add(c); vistos.add(c); }
+  const unicos = [...vistos];
+  const ocs = unicos.filter((c) => !esCotizacion(c));
+  const cotizaciones = unicos.filter(esCotizacion);
+  const noAplica = unicos.length === 0 && normTxt(s).includes('NO APLICA');
+  return { ocs, cotizaciones, repetidas: [...repetidas], noAplica };
 }
 
 export function tipoDesdeOC(oc) {
-  const suf = /-([A-Z][A-Z0-9])\d{2}$/.exec(oc);
+  const suf = /-([A-Z]{2,3}|L1)\d{2}$/.exec(oc);
   return suf ? SUFIJO_A_TIPO[suf[1]] || null : null;
 }
 export function programaDesdeOC(oc) {
@@ -344,9 +357,11 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
 
     // OC
     const ocTextoCrudo = celda(f, 'ocs');
-    const { ocs, noAplica } = extraerOCs(ocTextoCrudo);
+    const { ocs, cotizaciones, repetidas, noAplica } = extraerOCs(ocTextoCrudo);
     if (ocs.length > 1) advFila('OC_VARIAS', `Fila ${filaExcel}: ${ocs.length} OC en la misma celda`);
-    if (montoOC > 0 && ocs.length === 0) advFila('OC_MONTO_SIN_NUMERO', `Fila ${filaExcel}: monto OC mayor que 0 sin N° de OC`);
+    if (repetidas.length) advFila('OC_REPETIDA', `Fila ${filaExcel}: OC repetida en la celda (${repetidas.join(', ')}); se cuenta una vez`);
+    if (cotizaciones.length && !ocs.length) advFila('COTIZACION_SIN_OC', `Fila ${filaExcel}: trae ID de cotización (${cotizaciones.join(', ')}) sin OC`);
+    else if (montoOC > 0 && ocs.length === 0 && !noAplica) advFila('OC_MONTO_SIN_NUMERO', `Fila ${filaExcel}: monto OC mayor que 0 sin N° de OC`);
     const progOC = [...new Set(ocs.map(programaDesdeOC).filter(Boolean))];
     if (programa && progOC.some((p) => p !== programa)) {
       advFila('OC_PREFIJO_PROGRAMA', `Fila ${filaExcel}: OC de otra unidad compradora (programa ${progOC.join('/')}) en una fila del programa ${programa}`);
@@ -401,6 +416,7 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
       montoOC,
       ocs,
       ocNoAplica: noAplica,
+      idMercadoPublico: cotizaciones[0] || null,
       ocTexto: esVacio(ocTextoCrudo) ? null : String(ocTextoCrudo).trim(),
       tipoCompra: tipo,
       tipoCompraOriginal: tipoOriginal,
