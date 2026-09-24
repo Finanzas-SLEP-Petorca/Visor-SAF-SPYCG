@@ -46,7 +46,11 @@
     <div class="espacio"></div>
     <span id="cab-sync" class="pill"><span class="punto"></span><span>Sincronizando…</span></span>
     <span id="cab-edicion" class="small muted"></span>
-    <button id="btn-tema" class="chico" title="Cambiar tema claro/oscuro" aria-label="Cambiar tema">◐</button>
+    <div class="selector-tema" role="group" aria-label="Tema de colores">
+      <button class="chico" data-tema="light" title="Tema claro" aria-pressed="false"><span aria-hidden="true">☀</span> Claro</button>
+      <button class="chico" data-tema="dark" title="Tema oscuro" aria-pressed="false"><span aria-hidden="true">☾</span> Oscuro</button>
+      <button class="chico" data-tema="system" title="Igual que el sistema operativo" aria-pressed="false"><span aria-hidden="true">◐</span> Sistema</button>
+    </div>
     <button id="btn-salir" class="chico">Salir</button>
   </header>
   <nav class="pestanas" id="pestanas" aria-label="Vistas">
@@ -61,6 +65,7 @@
     <a href="#parametros">Parámetros</a>
     <a href="#historial">Historial</a>
   </nav>
+  <div id="guia" class="guia-wrap"></div>
   <main id="vista" tabindex="-1"></main>
 </div>
 

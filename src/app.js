@@ -6,6 +6,7 @@ import { hoyISO } from './logica/habiles.js';
 import { esc, hace, aDate } from './formato.js';
 import { nombreRol, toast } from './ui.js';
 import { abrirDetalle, refrescarDetalle } from './vistas/detalle.js';
+import { pintarGuia } from './guias.js';
 import * as resumen from './vistas/resumen.js';
 import * as planilla from './vistas/planilla.js';
 import * as fuentes from './vistas/fuentes.js';
@@ -23,17 +24,23 @@ const mostrar = (id) => ['acceso', 'primer-ingreso', 'app'].forEach((x) => $(x).
 
 // ------------------------------------------------------------------ tema
 const TEMA = 'visorTema';
+const oscuroSistema = matchMedia('(prefers-color-scheme: dark)');
 function aplicarTema(t) {
-  if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  const tema = t === 'light' || t === 'dark' ? t : 'system';
+  if (tema === 'system') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = tema;
+  document.querySelectorAll('[data-tema]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.tema === tema)));
+  const efectivo = tema === 'system' ? (oscuroSistema.matches ? 'oscuro' : 'claro') : (tema === 'dark' ? 'oscuro' : 'claro');
+  document.querySelector('[data-tema="system"]').title = `Igual que el sistema operativo (ahora: ${efectivo})`;
 }
-try { aplicarTema(localStorage.getItem(TEMA)); } catch { /* sin almacenamiento */ }
-$('btn-tema').addEventListener('click', () => {
-  const oscuro = document.documentElement.dataset.theme === 'dark'
-    || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
-  const t = oscuro ? 'light' : 'dark';
-  aplicarTema(t);
-  try { localStorage.setItem(TEMA, t); } catch { /* */ }
-});
+let temaGuardado = null;
+try { temaGuardado = localStorage.getItem(TEMA); } catch { /* sin almacenamiento */ }
+aplicarTema(temaGuardado);
+document.querySelectorAll('[data-tema]').forEach((b) => b.addEventListener('click', () => {
+  aplicarTema(b.dataset.tema);
+  try { localStorage.setItem(TEMA, b.dataset.tema); } catch { /* */ }
+}));
+oscuroSistema.addEventListener('change', () => { let t = null; try { t = localStorage.getItem(TEMA); } catch { /* */ } aplicarTema(t); });
 
 // ------------------------------------------------------------------ acceso
 function mensaje(id, txt, tipo = '') {
@@ -157,6 +164,8 @@ function render(forzar = false) {
   const v = VISTAS[nombre] || resumen;
   document.querySelectorAll('#pestanas a').forEach((a) => a.setAttribute('aria-current', a.getAttribute('href') === `#${nombre}` ? 'page' : 'false'));
   const cambio = vistaActual !== nombre;
+  const claveGuia = `${nombre}|${estado.rol}`;
+  if (cambio || $('guia').dataset.clave !== claveGuia) { pintarGuia($('guia'), VISTAS[nombre] ? nombre : 'resumen', estado.rol); $('guia').dataset.clave = claveGuia; }
   vistaActual = nombre;
   const scroll = el.querySelector('.tabla-wrap')?.scrollTop;
   try {

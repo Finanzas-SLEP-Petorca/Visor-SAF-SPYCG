@@ -29,6 +29,7 @@
   --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #4a3aa7;
   --grid: #e1e0d9;
   --seq-0: #f1f5f9; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95;
+  --guia-bg: #eff6ff; --guia-line: #bfdbfe; --guia-ink: #1d4ed8;
   --radius: 10px;
   --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .08);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -42,6 +43,7 @@
     --st-rojo-bg: #3b1616; --st-amarillo-bg: #3a2e0b; --st-verde-bg: #11301a; --st-azul-bg: #132a47; --st-gris-bg: #262a31;
     --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #9085e9; --grid: #2c2c2a;
     --seq-0: #1e293b; --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #9ec5f4;
+    --guia-bg: #0f1d33; --guia-line: #1e3a5f; --guia-ink: #93c5fd;
   }
 }
 :root[data-theme="dark"] {
@@ -52,6 +54,7 @@
   --st-rojo-bg: #3b1616; --st-amarillo-bg: #3a2e0b; --st-verde-bg: #11301a; --st-azul-bg: #132a47; --st-gris-bg: #262a31;
   --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #9085e9; --grid: #2c2c2a;
   --seq-0: #1e293b; --seq-1: #104281; --seq-2: #184f95; --seq-3: #1c5cab; --seq-4: #2a78d6; --seq-5: #5598e7; --seq-6: #9ec5f4;
+  --guia-bg: #0f1d33; --guia-line: #1e3a5f; --guia-ink: #93c5fd;
 }
 
 * { box-sizing: border-box; }
@@ -116,6 +119,27 @@ nav.pestanas { display: flex; gap: .25rem; overflow-x: auto; padding: .4rem 1rem
 nav.pestanas a { padding: .35rem .7rem; border-radius: 8px; color: var(--ink-2); text-decoration: none; white-space: nowrap; }
 nav.pestanas a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
 main { padding: 1rem; max-width: 100%; }
+
+/* ---------- selector de tema ---------- */
+.selector-tema { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; }
+.selector-tema button { border: none; border-radius: 0; background: var(--surface); color: var(--ink-2); }
+.selector-tema button + button { border-left: 1px solid var(--line-2); }
+.selector-tema button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+/* ---------- guía de uso por pestaña ---------- */
+.guia-wrap { padding: 1rem 1rem 0; }
+.guia { background: var(--guia-bg); border: 1px solid var(--guia-line); border-radius: var(--radius); color: var(--ink); }
+.guia summary { cursor: pointer; padding: .55rem .9rem; font-size: 13px; color: var(--guia-ink); list-style-position: inside; }
+.guia summary span { font-weight: 700; margin-right: .2rem; }
+.guia[open] summary { border-bottom: 1px solid var(--guia-line); }
+.guia-cuerpo { display: grid; gap: .5rem 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); padding: .6rem .9rem .8rem; font-size: 13px; }
+.guia-cuerpo h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--guia-ink); margin: .2rem 0 .3rem; }
+.guia-cuerpo p { margin: 0 0 .4rem; }
+.guia-cuerpo ul { margin: 0; padding-left: 1.1rem; }
+.guia-cuerpo li { margin-bottom: .25rem; }
+.guia-rol { background: var(--editable); border-left: 3px solid var(--editable-line); padding: .35rem .55rem; border-radius: 4px; }
+.celda-muestra { background: var(--editable); box-shadow: inset 0 0 0 1px var(--editable-line); padding: 0 .3rem; border-radius: 3px; }
+.guia-wrap + main { padding-top: .75rem; }
 
 /* ---------- tarjetas y KPIs ---------- */
 .tarjeta { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1rem; }
