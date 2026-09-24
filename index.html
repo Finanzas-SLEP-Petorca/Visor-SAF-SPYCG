@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visor de Monitoreo de Control, Ejecución y Proyección SAF/SPYCG</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/visor.css">
+</head>
+<body>
+
+<!-- Acceso -->
+<section id="acceso" class="pantalla-acceso oculto">
+  <div class="tarjeta-acceso">
+    <h1>Visor de Monitoreo de Control, Ejecución y Proyección SAF/SPYCG</h1>
+    <p class="muted small">Servicio Local de Educación Pública de Petorca · Acceso restringido por rol</p>
+    <div id="acceso-form">
+      <label class="campo" for="acceso-email"><span>Correo</span></label>
+      <input type="email" id="acceso-email" autocomplete="email" placeholder="nombre.apellido@sleppetorca.gob.cl">
+      <button id="acceso-enviar" class="primario">Enviar enlace de acceso</button>
+    </div>
+    <div id="acceso-msg" class="aviso oculto" role="status"></div>
+  </div>
+</section>
+
+<!-- Primer ingreso del administrador -->
+<section id="primer-ingreso" class="pantalla-acceso oculto">
+  <div class="tarjeta-acceso">
+    <h1>Configuración inicial de roles</h1>
+    <p class="small">El documento <code>visor_config/roles</code> aún no existe. Cargue el archivo de roles
+      (<code>roles-inicial.json</code>, preparado fuera del repositorio) para crearlo.</p>
+    <input type="file" id="roles-archivo" accept=".json,application/json">
+    <button id="roles-crear" class="primario">Crear documento de roles</button>
+    <div id="roles-msg" class="aviso oculto" role="status"></div>
+  </div>
+</section>
+
+<!-- Aplicación -->
+<div id="app" class="oculto">
+  <header class="barra">
+    <div>
+      <h1>Visor de Monitoreo de Control, Ejecución y Proyección SAF/SPYCG</h1>
+      <div class="sub" id="cab-usuario"></div>
+    </div>
+    <div class="espacio"></div>
+    <span id="cab-sync" class="pill"><span class="punto"></span><span>Sincronizando…</span></span>
+    <span id="cab-edicion" class="small muted"></span>
+    <div class="selector-tema" role="group" aria-label="Tema de colores">
+      <button class="chico" data-tema="light" title="Tema claro" aria-pressed="false"><span aria-hidden="true">☀</span> Claro</button>
+      <button class="chico" data-tema="dark" title="Tema oscuro" aria-pressed="false"><span aria-hidden="true">☾</span> Oscuro</button>
+      <button class="chico" data-tema="system" title="Igual que el sistema operativo" aria-pressed="false"><span aria-hidden="true">◐</span> Sistema</button>
+    </div>
+    <button id="btn-salir" class="chico">Salir</button>
+  </header>
+  <nav class="pestanas" id="pestanas" aria-label="Vistas">
+    <a href="#resumen">Resumen</a>
+    <a href="#planilla">Planilla en línea</a>
+    <a href="#fuentes">Por fuente</a>
+    <a href="#unidades">Por unidad</a>
+    <a href="#calendario">Calendario</a>
+    <a href="#observaciones">Observaciones</a>
+    <a href="#proveedores">Proveedores</a>
+    <a href="#calidad">Calidad y sincronización</a>
+    <a href="#parametros">Parámetros</a>
+    <a href="#historial">Historial</a>
+  </nav>
+  <div id="guia" class="guia-wrap"></div>
+  <main id="vista" tabindex="-1"></main>
+</div>
+
+<dialog id="detalle" class="detalle" aria-labelledby="detalle-titulo"></dialog>
+<div id="toast" class="toast oculto" role="status" aria-live="polite"></div>
+<div id="tooltip" class="tooltip oculto" role="tooltip"></div>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

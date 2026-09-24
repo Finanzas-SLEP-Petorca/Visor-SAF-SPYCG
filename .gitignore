@@ -13,6 +13,9 @@ data/
 !package-lock.json
 !firebase.json
 !.firebaserc
+# Estado local del agente de sincronización (contiene datos internos)
+sync/.estado/
+
 # Dependencias y emulador
 node_modules/
 firebase-debug.log
