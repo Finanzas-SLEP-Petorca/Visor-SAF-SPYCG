@@ -4,7 +4,7 @@ import { estado, resolverRol, iniciarSuscripciones, detener, alCambiar, guardarR
 import { unificar, calcularTodo, generarAlertas, calcularFrescura } from './logica/motor.js';
 import { hoyISO } from './logica/habiles.js';
 import { esc, hace, aDate } from './formato.js';
-import { nombreRol, toast } from './ui.js';
+import { nombreRol, toast, activarScrollSuperior } from './ui.js';
 import { abrirDetalle, refrescarDetalle } from './vistas/detalle.js';
 import { pintarGuia } from './guias.js';
 import * as resumen from './vistas/resumen.js';
@@ -167,14 +167,27 @@ function render(forzar = false) {
   const claveGuia = `${nombre}|${estado.rol}`;
   if (cambio || $('guia').dataset.clave !== claveGuia) { pintarGuia($('guia'), VISTAS[nombre] ? nombre : 'resumen', estado.rol); $('guia').dataset.clave = claveGuia; }
   vistaActual = nombre;
-  const scroll = el.querySelector('.tabla-wrap')?.scrollTop;
+  const wrapPrevio = el.querySelector('.tabla-wrap');
+  const scroll = wrapPrevio?.scrollTop;
+  const scrollX = wrapPrevio?.scrollLeft;
   try {
     v.render(el, ctx, { cambio });
   } catch (e) {
     console.error(e);
     el.innerHTML = `<div class="aviso error">Error al mostrar la vista: ${esc(e.message)}</div>`;
   }
-  if (!cambio && scroll) { const w = el.querySelector('.tabla-wrap'); if (w) w.scrollTop = scroll; }
+  // Alto de encabezado + pestañas (fijos arriba): ahí se pega la barra de desplazamiento superior.
+  // No se usa offsetTop: en elementos "sticky" cambia al bajar por la página.
+  const cabH = document.querySelector('header.barra').offsetHeight;
+  const nav = $('pestanas');
+  const fija = getComputedStyle(nav).position === 'sticky';
+  document.documentElement.style.setProperty('--alto-barra', `${cabH}px`);
+  document.documentElement.style.setProperty('--alto-cabecera', `${fija ? cabH + nav.offsetHeight : 0}px`);
+  if (!cambio && (scroll || scrollX)) {
+    const w = el.querySelector('.tabla-wrap');
+    if (w) { w.scrollTop = scroll || 0; w.scrollLeft = scrollX || 0; }
+  }
+  activarScrollSuperior(el);
   refrescarDetalle(ctx);
 }
 

@@ -93,3 +93,33 @@ export function ordenar(arr, fn, dir = 1) {
     return (typeof x === 'number' && typeof y === 'number' ? x - y : String(x).localeCompare(String(y), 'es', { numeric: true })) * dir;
   });
 }
+
+/**
+ * Tablas anchas: agrega una barra de desplazamiento horizontal ARRIBA de la tabla (fija bajo la
+ * navegación al bajar por la página) y ajusta el alto de la tabla a la ventana, para no tener que
+ * ir al final para moverse hacia el lado.
+ */
+export function activarScrollSuperior(raiz) {
+  raiz.querySelectorAll('.tabla-wrap:not(.libre)').forEach((wrap) => {
+    if (wrap.previousElementSibling?.classList.contains('scroll-sup')) return;
+    const barra = document.createElement('div');
+    barra.className = 'scroll-sup no-imprimir';
+    barra.setAttribute('aria-hidden', 'true');
+    barra.innerHTML = '<div></div>';
+    wrap.before(barra);
+    const ajustar = () => {
+      barra.firstChild.style.width = `${wrap.scrollWidth}px`;
+      barra.style.display = wrap.scrollWidth > wrap.clientWidth + 1 ? '' : 'none';
+      // La tabla cabe completa en la ventana bajo la navegación: su barra inferior también queda a la vista.
+      const cab = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--alto-cabecera')) || 96;
+      wrap.style.maxHeight = `${Math.max(320, window.innerHeight - cab - 40)}px`;
+    };
+    let origen = null;
+    barra.addEventListener('scroll', () => { if (origen === 'wrap') { origen = null; return; } origen = 'barra'; wrap.scrollLeft = barra.scrollLeft; });
+    wrap.addEventListener('scroll', () => { if (origen === 'barra') { origen = null; return; } origen = 'wrap'; barra.scrollLeft = wrap.scrollLeft; });
+    ajustar();
+    barra.scrollLeft = wrap.scrollLeft;
+    new ResizeObserver(ajustar).observe(wrap);
+    window.addEventListener('resize', ajustar, { passive: true });
+  });
+}
