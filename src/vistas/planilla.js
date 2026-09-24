@@ -5,7 +5,7 @@ import { ESTADOS_PROCESO, ESTADOS_GENERALES, MODALIDADES, ROLES_OBS, ROLES } fro
 import { ETAPAS, repartirPorFuente } from '../logica/motor.js';
 import { MESES } from '../util.js';
 import { esc, clp, fecha, fechaDe, pct } from '../formato.js';
-import { semaforo, etapa, opciones, toast, ordenar, activarTooltips, fuenteCifra } from '../ui.js';
+import { semaforo, etapa, opciones, toast, ordenar, activarTooltips, fuenteCifra, activarScrollSuperior } from '../ui.js';
 import { exportarExcel, exportarCSV } from './exportar.js';
 
 const f = {
@@ -13,6 +13,8 @@ const f = {
 };
 let orden = { k: 'id', dir: 1 };
 let doceMeses = false;
+/** Compras marcadas para exportar (se conservan al filtrar u ordenar). */
+const seleccion = new Set();
 
 const fuentesDe = (c) => Object.keys(repartirPorFuente(c, 1));
 const ventanaEstado = (c) => (!c.v.aplica ? 'na' : c.v.margen < 0 ? 'vencida' : c.v.margen <= 10 ? 'proxima' : 'ok');
@@ -67,8 +69,9 @@ function filaHTML(c, ctx) {
   const ultC = contactos.map((x) => x.fecha).filter(Boolean).sort().pop() || g.compras_fechaUltimoContacto;
   const tieneC = contactos.length > 0 || g.compras_contactoRealizado;
   const motivos = c.s.motivos.map((m) => esc(m.texto)).join('<br>');
-  return `<tr data-id="${esc(c.id)}"${flash ? ' class="flash"' : ''}>
-    <td class="col-fija nowrap"><button class="chico" data-abrir="${esc(c.id)}" title="Abrir detalle">${esc(c.id)}</button>${flash ? `<span class="editado-por">editado por ${esc(nombreDe(rec.por))}</span>` : ''}</td>
+  const sel = seleccion.has(c.id);
+  return `<tr data-id="${esc(c.id)}" class="${flash ? 'flash' : ''}${sel ? ' sel' : ''}">
+    <td class="col-fija nowrap"><input type="checkbox" class="chk-sel" data-sel="${esc(c.id)}"${sel ? ' checked' : ''} aria-label="Seleccionar ${esc(c.id)}"> <button class="chico" data-abrir="${esc(c.id)}" title="Abrir detalle">${esc(c.id)}</button>${flash ? `<span class="editado-por">editado por ${esc(nombreDe(rec.por))}</span>` : ''}</td>
     <td>${esc(c.unidad)}</td><td>${esc(c.programa || '')}</td><td>${esc(c.subtitulo || '')}</td><td>${esc(c.asignacion || '')}</td>
     <td class="detalle-celda">${esc(c.detalle || '')}${c.vinculo ? ' <span class="tag" title="Vinculada a otro origen por OC">🔗</span>' : ''}</td>
     <td>${fuentesDe(c).map((x) => `<span class="tag">${esc(x)}</span>`).join('')}</td>
@@ -94,7 +97,8 @@ export function render(el, ctx) {
   el.innerHTML = `
   <div class="fila no-imprimir" style="margin-bottom:.5rem"><h2 style="margin:0">Planilla en línea</h2><div class="espacio"></div>
     <label class="small"><input type="checkbox" id="pl-12"${doceMeses ? ' checked' : ''}> 12 meses</label>
-    <button id="pl-xlsx">Exportar Excel</button><button id="pl-csv">Exportar CSV</button></div>
+    <button id="pl-xlsx" title="Exporta todas las compras que muestra el filtro">Exportar Excel</button><button id="pl-csv" title="Exporta todas las compras que muestra el filtro">Exportar CSV</button></div>
+  <div id="pl-barra-sel" class="barra-sel no-imprimir"></div>
   <div class="filtros">
     <label>Unidad<select data-f="unidad">${opciones(uniq((c) => c.unidad), f.unidad, 'Todas')}</select></label>
     <label>Subdirección<select data-f="subdir">${opciones([...new Set([...Object.values(ctx.p.mapaSubdireccion || {}), 'Sin asignar'])], f.subdir, 'Todas')}</select></label>
@@ -111,7 +115,7 @@ export function render(el, ctx) {
   <div class="small muted" style="margin-bottom:.4rem">${lista.length} de ${ctx.calc.length} compras · totales sin SEP (solo seguimiento): PAC ${clp(tot.pac)} · Adjudicado/OC ${clp(tot.adj)} · Devengado ${clp(tot.real)}
     ${estado.rol ? ' · Las celdas amarillas son editables por su rol' : ''}</div>
   <div class="tabla-wrap"><table class="t" id="tabla-planilla"><thead><tr>
-    ${th('id', 'ID', 'col-fija')}${th('unidad', 'Unidad')}<th>Prog.</th><th>Subt.</th><th>Asig.</th>${th('detalle', 'Detalle')}<th>Fuente(s)</th><th>Modalidad</th>
+    <th class="col-fija nowrap"><input type="checkbox" id="pl-sel-todas" title="Seleccionar todas las compras filtradas" aria-label="Seleccionar todas las compras filtradas"> <span data-orden="id" style="cursor:pointer">ID${orden.k === 'id' ? (orden.dir > 0 ? ' ▲' : ' ▼') : ''}</span></th>${th('unidad', 'Unidad')}<th>Prog.</th><th>Subt.</th><th>Asig.</th>${th('detalle', 'Detalle')}<th>Fuente(s)</th><th>Modalidad</th>
     ${th('pac', 'PAC', 'num')}${th('adj', 'Adjudicado/OC', 'num')}${th('real', 'Devengado', 'num')}${th('pct', '% ejec.', 'num')}
     ${th('etapa', 'Etapa')}<th>Estado proceso</th><th>Estado general</th>${th('margen', 'Ventana')}
     ${meses.map((m) => th(['OCT', 'NOV', 'DIC'].includes(m) ? m.toLowerCase() : null, m, 'num')).join('')}
@@ -128,7 +132,42 @@ export function render(el, ctx) {
   });
   el.querySelector('#pl-limpiar').onclick = () => { Object.keys(f).forEach((k) => { f[k] = ''; }); render(el, ctx); };
   el.querySelector('#pl-12').onchange = (e) => { doceMeses = e.target.checked; render(el, ctx); };
-  el.querySelectorAll('th[data-orden]').forEach((h) => {
+  // ---- selección para exportar
+  const barraSel = () => {
+    const b = el.querySelector('#pl-barra-sel');
+    const n = seleccion.size;
+    const visibles = lista.filter((c) => seleccion.has(c.id)).length;
+    b.innerHTML = n ? `<b>${n}</b> ${n === 1 ? 'compra seleccionada' : 'compras seleccionadas'}${visibles < n ? ` <span class="muted">(${n - visibles} fuera del filtro actual)</span>` : ''}
+      <button class="chico primario" id="pl-sel-xlsx">Exportar selección a Excel</button><button class="chico" id="pl-sel-csv">Exportar selección a CSV</button>
+      <button class="chico" id="pl-sel-limpiar">Quitar selección</button>` : '<span class="muted small">Marque las casillas de la columna ID para exportar solo algunas compras.</span>';
+    const todas = el.querySelector('#pl-sel-todas');
+    todas.checked = lista.length > 0 && lista.every((c) => seleccion.has(c.id));
+    todas.indeterminate = !todas.checked && lista.some((c) => seleccion.has(c.id));
+    if (!n) return;
+    const elegidas = () => ctx.calc.filter((c) => seleccion.has(c.id));
+    b.querySelector('#pl-sel-xlsx').onclick = () => exportarExcel(elegidas(), ctx, 'seleccion').catch((e) => toast(e.message, true));
+    b.querySelector('#pl-sel-csv').onclick = () => exportarCSV(elegidas(), ctx, 'seleccion');
+    b.querySelector('#pl-sel-limpiar').onclick = () => {
+      seleccion.clear();
+      el.querySelectorAll('[data-sel]').forEach((x) => { x.checked = false; x.closest('tr').classList.remove('sel'); });
+      barraSel();
+    };
+  };
+  barraSel();
+  el.querySelector('tbody').addEventListener('change', (e) => {
+    const chk = e.target.closest('[data-sel]');
+    if (!chk) return;
+    if (chk.checked) seleccion.add(chk.dataset.sel); else seleccion.delete(chk.dataset.sel);
+    chk.closest('tr').classList.toggle('sel', chk.checked);
+    barraSel();
+  });
+  el.querySelector('#pl-sel-todas').onchange = (e) => {
+    for (const c of lista) { if (e.target.checked) seleccion.add(c.id); else seleccion.delete(c.id); }
+    el.querySelectorAll('[data-sel]').forEach((x) => { x.checked = e.target.checked; x.closest('tr').classList.toggle('sel', e.target.checked); });
+    barraSel();
+  };
+
+  el.querySelectorAll('[data-orden]').forEach((h) => {
     h.onclick = () => { const k = h.dataset.orden; orden = { k, dir: orden.k === k ? -orden.dir : 1 }; render(el, ctx); };
   });
   el.querySelector('tbody').addEventListener('click', (e) => {
@@ -137,7 +176,7 @@ export function render(el, ctx) {
   });
   el.querySelector('tbody').addEventListener('change', async (e) => {
     const td = e.target.closest('td.editable');
-    if (!td) return;
+    if (!td || e.target.matches('[data-sel]')) return;
     const id = td.closest('tr').dataset.id;
     const campo = td.dataset.campo;
     let v = e.target.value;
@@ -148,4 +187,5 @@ export function render(el, ctx) {
   el.querySelector('#pl-xlsx').onclick = () => exportarExcel(lista, ctx).catch((e) => toast(e.message, true));
   el.querySelector('#pl-csv').onclick = () => exportarCSV(lista, ctx);
   activarTooltips(el);
+  activarScrollSuperior(el);
 }

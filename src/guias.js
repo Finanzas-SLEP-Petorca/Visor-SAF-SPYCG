@@ -40,7 +40,9 @@ const G = {
       'Use los <b>filtros</b> (unidad, Subdirección, fuente, etapa, semáforo, ventana, texto) para acotar la tabla; los totales de arriba y las exportaciones respetan el filtro.',
       'Haga clic en un <b>encabezado</b> (PAC, Etapa, Ventana, Semáforo…) para ordenar.',
       'Cuando otra persona cambia una compra, la fila se ilumina y dice "editado por…".',
-      '<b>Exportar Excel/CSV</b> descarga lo que está filtrado, con fuente, fecha de corte y usuario.',
+      '<b>Exportar Excel/CSV</b> descarga lo que está filtrado, con fuente, fecha de corte y usuario. Para exportar solo algunas compras, marque sus <b>casillas</b> en la columna ID (la casilla del encabezado marca todas las filtradas) y use "Exportar selección".',
+      'Para moverse hacia el lado use la <b>barra de desplazamiento de arriba</b> de la tabla, que queda fija al bajar por la página, o Mayús + rueda del mouse.',
+      'En el detalle de una compra, <b>⬇ Excel</b> y <b>⬇ PDF</b> descargan solo esa compra. El detalle se cierra con "Cerrar", con Esc o haciendo clic fuera del recuadro; si hay cambios sin guardar, pregunta antes.',
     ],
   },
   fuentes: {
