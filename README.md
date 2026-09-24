@@ -72,6 +72,8 @@ Los gráficos son SVG propios.
    `Monitoreo control de pagos y ejecucion 2026` (o *Elegir archivos*).
 2. Se reconocen `ESTATUS DEVENGOS COMPRAS <UNIDAD> 2026.xlsx` (acepta unidades nuevas con el mismo
    patrón) y el Seguimiento SEP (nombre con "SEGUIMIENTO" y "SEP").
+   El Seguimiento SEP es **solo de seguimiento**: no suma en los totales del Servicio, porque sus compras
+   se registran en las planillas de las unidades (UATP y otras Subdirecciones).
 3. Revise la **conciliación** (compras nuevas, desaparecidas o con detalle muy distinto) y las
    advertencias de calidad, y presione **Confirmar importación**. La gestión y las observaciones se
    conservan: están en otra capa, asociadas al ID de la compra (`<UNIDAD>-<N° con 3 dígitos>`).

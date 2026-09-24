@@ -57,7 +57,7 @@ function renderSEP(el, ctx) {
   propuestos.sort((a, b) => b.sim - a.sim);
   const tot = sep.reduce((a, c) => ({ pres: a.pres + c.m.pac, adj: a.adj + (c.base.montoAdjudicado || 0), dev: a.dev + (c.base.montoDevengado || 0), pag: a.pag + (c.base.montoPagado || 0) }), { pres: 0, adj: 0, dev: 0, pag: 0 });
   const admin = estado.esAdmin;
-  el.innerHTML = `<h2>Seguimiento SEP</h2>
+  el.innerHTML = `<h2>Seguimiento SEP <span class="small muted">(solo seguimiento: no suma en los totales)</span></h2>
   <div class="grilla">
     <div class="tarjeta kpi"><div class="etq">Ítems</div><div class="val">${sep.length}</div></div>
     <div class="tarjeta kpi"><div class="etq">Presupuestado</div><div class="val">${clp(tot.pres)}</div></div>
@@ -71,7 +71,7 @@ function renderSEP(el, ctx) {
     <td class="num">${clp(b.montoDevengado)}</td><td class="num">${clp(b.montoPagado)}</td>
     <td class="small">${c.vinculo ? `🔗 ${esc(c.vinculo.compraId)} (${esc(c.vinculo.estado)})${admin ? ` <button class="chico" data-descartar="${esc(c.id)}|${esc(c.vinculo.compraId)}">Descartar</button>` : ''}` : '—'}</td><td>${semaforo(c.s.color)}</td></tr>`; }).join('')}
   </tbody></table></div>
-  <p class="small muted">La columna "Etapa actual" de la planilla SEP no se lee (trae #REF!); la fase se recalcula con la lógica del Visor. Ítems vinculados a un contrato de una unidad no se suman dos veces en los totales del Servicio.</p>
+  <p class="small muted">La columna "Etapa actual" de la planilla SEP no se lee (trae #REF!); la fase se recalcula con la lógica del Visor. SEP es solo de seguimiento: no suma en los totales del Servicio, porque sus compras se registran en las planillas de las unidades. El vínculo 🔗 indica en qué compra de una unidad está cada ítem.</p>
   <div class="tarjeta" style="margin-top:1rem"><h3>Vínculos propuestos por similitud (confirmar o descartar)</h3>
   ${propuestos.length ? `<div class="tabla-wrap libre"><table class="t"><thead><tr><th>Ítem SEP</th><th>Compra de unidad</th><th class="num">Similitud</th><th></th></tr></thead><tbody>
     ${propuestos.slice(0, 40).map((x) => `<tr><td>${esc(x.sepId)} · ${esc(x.sep.detalle)}</td><td>${esc(x.compraId)} · ${esc(x.u.detalle)} (${esc(x.u.unidad)})</td><td class="num">${pct(x.sim)}</td>

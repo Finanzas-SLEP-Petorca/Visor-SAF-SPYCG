@@ -144,7 +144,7 @@ function pintar(ctx, conservarScroll = false) {
   if (c.s.motivos.length || c.s.etiqueta || c.vinculo) {
     partes.push(`<div class="tarjeta"><h3>Alertas</h3><ul class="small">${c.s.motivos.map((m) => `<li>${m.nivel === 'rojo' ? '⛔' : '⚠'} ${esc(m.texto)}</li>`).join('')}
       ${c.s.etiqueta ? `<li><b>${esc(c.s.etiqueta)}</b></li>` : ''}
-      ${c.vinculo ? `<li>🔗 Vinculada (${esc(c.vinculo.estado)}) ${c.origen === 'SEP' ? `con ${esc(c.vinculo.compraId)}; no se suma dos veces en los totales` : `con el ítem SEP ${esc(c.vinculo.sepId)}`}${c.vinculo.oc ? ` por la OC ${esc(c.vinculo.oc)}` : ''}</li>` : ''}</ul></div>`);
+      ${c.vinculo ? `<li>🔗 Vinculada (${esc(c.vinculo.estado)}) ${c.origen === 'SEP' ? `con ${esc(c.vinculo.compraId)}, donde se controla el contrato` : `con el ítem SEP ${esc(c.vinculo.sepId)}`}${c.vinculo.oc ? ` por la OC ${esc(c.vinculo.oc)}` : ''}</li>` : ''}</ul></div>`);
   }
 
   // Montos, ventana y proyección

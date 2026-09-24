@@ -108,7 +108,7 @@ export function render(el, ctx) {
     <label>Buscar<input type="search" data-f="texto" value="${esc(f.texto)}" placeholder="ID, detalle, OC…"></label>
     <button class="chico" id="pl-limpiar">Limpiar filtros</button>
   </div>
-  <div class="small muted" style="margin-bottom:.4rem">${lista.length} de ${ctx.calc.length} compras · PAC ${clp(tot.pac)} · Adjudicado/OC ${clp(tot.adj)} · Devengado ${clp(tot.real)}
+  <div class="small muted" style="margin-bottom:.4rem">${lista.length} de ${ctx.calc.length} compras · totales sin SEP (solo seguimiento): PAC ${clp(tot.pac)} · Adjudicado/OC ${clp(tot.adj)} · Devengado ${clp(tot.real)}
     ${estado.rol ? ' · Las celdas amarillas son editables por su rol' : ''}</div>
   <div class="tabla-wrap"><table class="t" id="tabla-planilla"><thead><tr>
     ${th('id', 'ID', 'col-fija')}${th('unidad', 'Unidad')}<th>Prog.</th><th>Subt.</th><th>Asig.</th>${th('detalle', 'Detalle')}<th>Fuente(s)</th><th>Modalidad</th>
