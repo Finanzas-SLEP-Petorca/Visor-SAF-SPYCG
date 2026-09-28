@@ -80,11 +80,12 @@ Los gráficos son SVG propios.
 
 ## Agente local (Fase 1b): actualización automática desde OneDrive
 
-Con el agente, lo que las unidades guardan en SharePoint aparece solo en el Visor (cada 10 minutos).
+Con el agente, lo que las unidades guardan en SharePoint aparece solo en el Visor: una revisión diaria,
+los días hábiles a las 12:00. Para una actualización inmediata, ejecute `npm run sync` en el PC del agente.
 
 1. **Firebase Console → Authentication → Sign-in method**: habilitar *Correo electrónico/contraseña*.
 2. **Authentication → Users → Agregar usuario**: un correo técnico (por ejemplo `visor-sync@…`) y
-   una contraseña larga. Copie su **UID**.
+   una contraseña larga. Copie su **UID** (no es la contraseña).
 3. En `firestore.rules`, reemplace `REEMPLAZAR_POR_UID_USUARIO_SYNC` por ese UID y publique las reglas.
    El usuario sync solo puede escribir `visor_base` y entradas de historial de tipo `sync`; no puede
    leer nada.
@@ -92,14 +93,16 @@ Con el agente, lo que las unidades guardan en SharePoint aparece solo en el Viso
    `sync/env.ejemplo` como `sync/.env` y complete `VISOR_DATA_DIR`, `VISOR_SYNC_EMAIL` y
    `VISOR_SYNC_PASSWORD`. `sync/.env` y `sync/.estado/` están fuera de git.
 5. Pruebe: `npm run sync:simular` (no escribe) y luego `npm run sync`.
-6. Programe la tarea (PowerShell, ajuste las rutas), cada 10 minutos de lunes a viernes de 08:00 a 19:00:
+6. Programe la tarea (PowerShell, ajuste la ruta): días hábiles a las 12:00, **sin abrir ventana**
+   (`sync/ejecutar-oculto.vbs` lanza el agente oculto y deja el registro en `sync\.estado\agente.log`):
 
    ```powershell
-   schtasks /Create /TN "Visor SAF-SPYCG agente" /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 08:00 /RI 10 /DU 11:00 `
-     /TR "cmd /c cd /d C:\Users\<usuario>\Documents\GitHub\Visor-SAF-SPYCG && node sync\agente-local.mjs >> sync\.estado\agente.log 2>&1"
+   schtasks /Create /F /TN "Visor SAF-SPYCG agente" /SC WEEKLY /D MON,TUE,WED,THU,FRI /ST 12:00 `
+     /TR "wscript.exe //B C:\Users\<usuario>\Documents\GitHub\Visor-SAF-SPYCG\sync\ejecutar-oculto.vbs"
    ```
 
-7. Ajuste la tarea para que no se salte días si el PC estaba apagado a las 08:00 y para que corra con batería:
+7. Ajuste la tarea para que, si el PC estaba apagado a las 12:00, la revisión se haga apenas se encienda,
+   y para que corra con batería:
 
    ```powershell
    $t = Get-ScheduledTask -TaskName "Visor SAF-SPYCG agente"
@@ -110,8 +113,8 @@ Con el agente, lo que las unidades guardan en SharePoint aparece solo en el Viso
    ```
 
 En cada ejecución el agente deja una marca de revisión (`visor_base/_agente`). *Calidad y sincronización*
-muestra "Agente local activo: última revisión hace N min" y avisa en rojo si pasan más de 30 minutos sin
-revisar en horario hábil.
+muestra "Agente local al día: última revisión …" y avisa en rojo si no se hizo la revisión del día hábil
+(desde las 12:30).
 
 El agente compara fecha y tamaño de cada archivo, copia a un temporal los que cambiaron (pueden estar
 abiertos en Excel), los normaliza y escribe solo si el contenido cambió. Solo registra conteos.
