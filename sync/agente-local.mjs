@@ -12,16 +12,17 @@
 // Opciones: --forzar (reimporta todo aunque no haya cambios) · --simular (no escribe en Firestore)
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync, rmSync, mkdtempSync } from 'node:fs';
 import { join, dirname } from 'node:path';
-import { tmpdir } from 'node:os';
+import { tmpdir, hostname } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import * as XLSX from 'xlsx';
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, signOut, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, doc, collection, writeBatch, serverTimestamp, terminate, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore, doc, collection, writeBatch, setDoc, serverTimestamp, terminate, connectFirestoreEmulator } from 'firebase/firestore';
 import { firebaseConfig } from '../src/firebase-config.js';
 import { prepararArchivo, clasificarArchivo } from '../src/importacion.js';
 import { mezclarParametros } from '../src/parametros-default.js';
 import { hoyISO } from '../src/logica/habiles.js';
+import { MARCA_AGENTE } from '../src/datos-comunes.js';
 
 const AQUI = dirname(fileURLToPath(import.meta.url));
 const DIR_ESTADO = join(AQUI, '.estado');
@@ -29,7 +30,9 @@ const ARCH_ESTADO = join(DIR_ESTADO, 'estado.json');
 const ARCH_CACHE = join(DIR_ESTADO, 'ultimo-base.json'); // datos internos: queda solo en este PC (gitignored)
 const ARCH_LOCK = join(DIR_ESTADO, 'agente.lock');
 const args = new Set(process.argv.slice(2));
-const log = (...m) => console.log(`[${new Date().toISOString()}]`, ...m);
+// El registro queda en ASCII: la consola de Windows (y Get-Content sin -Encoding) no muestra bien UTF-8.
+const ascii = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/·/g, '|').replace(/[^\x20-\x7e]/g, '?');
+const log = (...m) => console.log(`[${new Date().toISOString()}]`, ...m.map(ascii));
 
 function cargarEnv() {
   for (const ruta of [join(AQUI, '.env'), join(AQUI, '..', '.env')]) {
@@ -60,8 +63,8 @@ async function main() {
       return args.has('--forzar') || !prev || prev.mtimeMs !== st.mtimeMs || prev.size !== st.size;
     });
     log(`${archivos.length} planillas reconocidas; ${cambiados.length} con cambios.`);
-    if (!cambiados.length) return;
 
+    // Se conecta en cada ejecución (aunque no haya cambios) para dejar la marca "última revisión".
     let db = null;
     let email = null;
     if (!args.has('--simular')) {
@@ -74,6 +77,8 @@ async function main() {
       db = getFirestore(app);
       if (emu) connectFirestoreEmulator(db, '127.0.0.1', 8080);
     }
+    let escritas = 0;
+    let errores = 0;
     const p = mezclarParametros(null);
     const hoy = hoyISO();
     for (const n of cambiados) {
@@ -96,9 +101,10 @@ async function main() {
             ops += 1;
           }
           await b.commit();
-          log(`${r.unidad}: ${Object.keys(r.doc.filas).length} filas · nuevas ${r.conc.nuevos.length} · desaparecidas ${r.conc.desaparecidos.length} · modificadas ${r.conc.modificados.length} · advertencias ${r.advertencias.length}.`);
+          escritas += 1;
+          log(`${r.unidad}: ${Object.keys(r.doc.filas).length} filas | nuevas ${r.conc.nuevos.length} | desaparecidas ${r.conc.desaparecidos.length} | modificadas ${r.conc.modificados.length} | advertencias ${r.advertencias.length}.`);
         } else {
-          log(`[simulación] ${r.unidad}: ${Object.keys(r.doc.filas).length} filas · nuevas ${r.conc.nuevos.length} · modificadas ${r.conc.modificados.length} · advertencias ${r.advertencias.length}.`);
+          log(`[simulación] ${r.unidad}: ${Object.keys(r.doc.filas).length} filas | nuevas ${r.conc.nuevos.length} | modificadas ${r.conc.modificados.length} | advertencias ${r.advertencias.length}.`);
         }
         if (db) {
           cache[r.slug] = { filas: r.doc.filas, hash: r.doc.hash };
@@ -106,6 +112,7 @@ async function main() {
         }
       } catch (e) {
         log(`${n}: ERROR ${e.message}`);
+        errores += 1;
         process.exitCode = 1;
       }
     }
@@ -113,7 +120,15 @@ async function main() {
       writeFileSync(ARCH_CACHE, JSON.stringify(cache));
       writeFileSync(ARCH_ESTADO, JSON.stringify(estado, null, 1));
     }
-    if (db) { await signOut(getAuth()); await terminate(db); }
+    if (db) {
+      // Marca de vida del agente: la pantalla "Calidad y sincronización" avisa si deja de llegar.
+      await setDoc(doc(db, 'visor_base', MARCA_AGENTE), {
+        tipo: 'agente', ultimaRevision: serverTimestamp(), equipo: hostname(), cuenta: email,
+        planillas: archivos.length, conCambios: cambiados.length, escritas, errores,
+      });
+      await signOut(getAuth());
+      await terminate(db);
+    }
   } finally {
     rmSync(tmp, { recursive: true, force: true });
     rmSync(ARCH_LOCK, { force: true });
