@@ -193,6 +193,8 @@ function render(forzar = false) {
 
 $('vista').addEventListener('focusout', () => { if (pendiente) setTimeout(() => render(), 0); });
 window.addEventListener('hashchange', () => render(true));
+// Refresca los tiempos relativos ("hace N min") y el estado del agente una vez por minuto.
+setInterval(() => { if (!document.hidden) render(); }, 60000);
 alCambiar(() => render());
 window.addEventListener('error', (e) => toast(`Error: ${e.message}`, true));
 window.addEventListener('unhandledrejection', (e) => toast(`Error: ${e.reason?.message || e.reason}`, true));

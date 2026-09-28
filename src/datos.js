@@ -6,6 +6,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { db } from './firebase.js';
 import { mezclarParametros } from './parametros-default.js';
+import { MARCA_AGENTE, esDocTecnico } from './datos-comunes.js';
 
 export const estado = {
   user: null,
@@ -17,6 +18,7 @@ export const estado = {
   parametrosGuardados: null,
   parametros: mezclarParametros(null),
   bases: {},
+  agente: null, // marca de la última revisión del agente local (visor_base/_agente)
   gestion: {},
   contactos: [],
   recientes: {}, // compraId → { por, t } cambios de otros usuarios
@@ -81,7 +83,9 @@ export function iniciarSuscripciones() {
     notificar();
   }, err('parámetros')));
   subs.push(onSnapshot(collection(db, 'visor_base'), { includeMetadataChanges: true }, (qs) => {
-    estado.bases = Object.fromEntries(qs.docs.map((d) => [d.id, d.data()]));
+    estado.bases = Object.fromEntries(qs.docs.filter((d) => !esDocTecnico(d.id)).map((d) => [d.id, d.data()]));
+    const marca = qs.docs.find((d) => d.id === MARCA_AGENTE);
+    estado.agente = marca ? marca.data() : null;
     estado.sync.desdeCache = qs.metadata.fromCache;
     notificar();
   }, err('base')));

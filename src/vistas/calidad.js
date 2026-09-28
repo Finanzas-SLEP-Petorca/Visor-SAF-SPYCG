@@ -2,7 +2,7 @@
 import { estado, escribirImportacion } from '../datos.js';
 import { prepararArchivo, clasificarArchivo } from '../importacion.js';
 import { cargarSheetJS } from './exportar.js';
-import { esc, fechaHora, clp } from '../formato.js';
+import { esc, fechaHora, clp, aDate, hace } from '../formato.js';
 import { toast } from '../ui.js';
 
 let preparados = null; // resultado de la vista previa
@@ -24,6 +24,32 @@ function conteo(advs) {
   return Object.entries(c).map(([k, n]) => `<span class="tag${['PLANILLA_DESACTUALIZADA', 'DESGLOSE_NO_CUADRA', 'OC_IGUAL_PAC_TODAS'].includes(k) ? ' alerta' : ''}" title="${esc(k)}">${esc(NOMBRES[k] || k)}: ${n}</span>`).join('');
 }
 
+/** ¿Es horario del agente? Lunes a viernes, 08:00 a 19:00 en Santiago. */
+function enHorario(fecha = new Date()) {
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', weekday: 'short', hour: 'numeric', hourCycle: 'h23' })
+    .formatToParts(fecha).map((x) => [x.type, x.value]));
+  const h = Number(p.hour);
+  return !['Sat', 'Sun'].includes(p.weekday) && h >= 8 && h < 19;
+}
+
+/** Estado del agente local según su última marca de revisión. */
+export function estadoAgente(ctx) {
+  const a = ctx.estado.agente;
+  const txt = (cls, cuerpo) => `<div class="aviso ${cls}" style="margin:.6rem 0" role="status">${cuerpo}</div>`;
+  if (!a) {
+    return txt('', '<b>Agente local:</b> aún no reporta revisiones. Mientras no esté activo, las planillas se actualizan solo con "Importar planillas" (abajo).');
+  }
+  const d = aDate(a.ultimaRevision);
+  const min = d ? Math.round((Date.now() - d.getTime()) / 60000) : Infinity;
+  const detalle = `${a.planillas ?? '?'} planillas revisadas${a.conCambios ? `, ${a.conCambios} con cambios` : ', sin cambios'}${a.errores ? ` · <b>${a.errores} con error</b>` : ''} · equipo ${esc(a.equipo || '—')}`;
+  const cuando = `${hace(d)} (${fechaHora(d)})`;
+  if (min <= 30) return txt('ok', `<b>✓ Agente local activo:</b> última revisión ${cuando}. ${detalle}. Revisa cada 10 minutos, de lunes a viernes entre 08:00 y 19:00.`);
+  if (enHorario()) {
+    return txt('error', `<b>⚠ El agente local no revisa hace ${min >= 1440 ? `${Math.floor(min / 1440)} días` : `${min} minutos`}</b> (última revisión ${cuando}). Revise que el PC del agente esté encendido, con sesión iniciada y OneDrive sincronizando. ${detalle}.`);
+  }
+  return txt('', `<b>Agente local fuera de horario:</b> última revisión ${cuando}. Vuelve a revisar el próximo día hábil desde las 08:00. ${detalle}.`);
+}
+
 export function render(el, ctx) {
   const bases = Object.entries(ctx.estado.bases).sort((a, b) => a[0].localeCompare(b[0]));
   const nombreDe = (em) => ctx.estado.rolesDoc?.usuarios?.[em]?.nombre || em;
@@ -36,7 +62,7 @@ export function render(el, ctx) {
     <td><details><summary class="small">${(b.advertencias || []).length} advertencias</summary>${conteo(b.advertencias)}
       <ul class="small">${(b.advertencias || []).slice(0, 300).map((a) => `<li>${esc(a.mensaje)}</li>`).join('')}</ul></details></td></tr>`; }).join('') || '<tr><td colspan="9" class="muted">Sin planillas importadas.</td></tr>'}
   </tbody></table></div>
-  <p class="small muted">La sincronización es manual en esta fase (botón de abajo). Con el agente local o el conector en la nube, esta tabla se actualiza sola.</p>
+  ${estadoAgente(ctx)}
   ${admin ? `<div class="tarjeta" style="margin-top:1rem"><h3>Importar planillas</h3>
     <p class="small">Seleccione la carpeta sincronizada de OneDrive "Monitoreo control de pagos y ejecucion 2026" o los archivos. Se leen en este navegador y <b>nunca se modifican</b>.
     Se reconocen los archivos "ESTATUS DEVENGOS COMPRAS &lt;UNIDAD&gt; 2026.xlsx" y el Seguimiento SEP.</p>
