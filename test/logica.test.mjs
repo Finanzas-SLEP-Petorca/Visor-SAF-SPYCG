@@ -204,3 +204,21 @@ test('conciliación: nuevos, desaparecidos, detalle muy distinto y cambios', () 
   assert.ok(h.some((e) => e.compraId === 'T-001' && e.campo === 'montoPAC' && e.antes === 100 && e.despues === 120));
   assert.equal(entradasHistorial('T', conciliar({}, nuevas)).length, 1);
 });
+
+test('agente local: una revisión diaria a las 12:00 en días hábiles', async () => {
+  const { revisionEsperada, agenteAlDia } = await import('../src/logica/agenda-agente.js');
+  const fer = new Set(['2026-10-12']);
+  const cl = (s) => new Date(`${s}-03:00`); // hora de Chile continental en septiembre-octubre 2026 (UTC-3)
+  // lunes 28-09 a las 10:00: la esperada es la del viernes 25-09
+  assert.equal(revisionEsperada(cl('2026-09-28T10:00:00'), fer), '2026-09-25');
+  // lunes 28-09 a las 12:40: ya debió revisar hoy
+  assert.equal(revisionEsperada(cl('2026-09-28T12:40:00'), fer), '2026-09-28');
+  // martes 13-10, después del feriado del lunes 12-10, a las 09:00: la esperada es la del viernes 09-10
+  assert.equal(revisionEsperada(cl('2026-10-13T09:00:00'), fer), '2026-10-09');
+  // domingo: la del viernes
+  assert.equal(revisionEsperada(cl('2026-09-27T15:00:00'), fer), '2026-09-25');
+  assert.equal(agenteAlDia(cl('2026-09-28T12:01:00'), cl('2026-09-28T15:00:00'), fer).alDia, true);
+  assert.equal(agenteAlDia(cl('2026-09-25T12:01:00'), cl('2026-09-28T15:00:00'), fer).alDia, false);
+  assert.equal(agenteAlDia(cl('2026-09-25T12:01:00'), cl('2026-09-28T11:00:00'), fer).alDia, true);
+  assert.equal(agenteAlDia(null, cl('2026-09-28T11:00:00'), fer).alDia, false);
+});
