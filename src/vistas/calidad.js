@@ -4,6 +4,7 @@ import { prepararArchivo, clasificarArchivo } from '../importacion.js';
 import { cargarSheetJS } from './exportar.js';
 import { esc, fechaHora, clp, aDate, hace } from '../formato.js';
 import { toast } from '../ui.js';
+import { agenteAlDia, HORA_AGENTE } from '../logica/agenda-agente.js';
 
 let preparados = null; // resultado de la vista previa
 let procesando = false;
@@ -24,30 +25,22 @@ function conteo(advs) {
   return Object.entries(c).map(([k, n]) => `<span class="tag${['PLANILLA_DESACTUALIZADA', 'DESGLOSE_NO_CUADRA', 'OC_IGUAL_PAC_TODAS'].includes(k) ? ' alerta' : ''}" title="${esc(k)}">${esc(NOMBRES[k] || k)}: ${n}</span>`).join('');
 }
 
-/** ¿Es horario del agente? Lunes a viernes, 08:00 a 19:00 en Santiago. */
-function enHorario(fecha = new Date()) {
-  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', weekday: 'short', hour: 'numeric', hourCycle: 'h23' })
-    .formatToParts(fecha).map((x) => [x.type, x.value]));
-  const h = Number(p.hour);
-  return !['Sat', 'Sun'].includes(p.weekday) && h >= 8 && h < 19;
-}
-
-/** Estado del agente local según su última marca de revisión. */
+/** Estado del agente local según su última marca de revisión (una revisión diaria a las 12:00). */
 export function estadoAgente(ctx) {
   const a = ctx.estado.agente;
   const txt = (cls, cuerpo) => `<div class="aviso ${cls}" style="margin:.6rem 0" role="status">${cuerpo}</div>`;
+  const manual = 'Para actualizar de inmediato: en el PC del agente, <code>npm run sync</code> en la carpeta del repositorio.';
   if (!a) {
-    return txt('', '<b>Agente local:</b> aún no reporta revisiones. Mientras no esté activo, las planillas se actualizan solo con "Importar planillas" (abajo).');
+    return txt('', `<b>Agente local:</b> aún no reporta revisiones. Mientras no esté activo, las planillas se actualizan solo con "Importar planillas" (abajo). ${manual}`);
   }
   const d = aDate(a.ultimaRevision);
-  const min = d ? Math.round((Date.now() - d.getTime()) / 60000) : Infinity;
   const detalle = `${a.planillas ?? '?'} planillas revisadas${a.conCambios ? `, ${a.conCambios} con cambios` : ', sin cambios'}${a.errores ? ` · <b>${a.errores} con error</b>` : ''} · equipo ${esc(a.equipo || '—')}`;
   const cuando = `${hace(d)} (${fechaHora(d)})`;
-  if (min <= 30) return txt('ok', `<b>✓ Agente local activo:</b> última revisión ${cuando}. ${detalle}. Revisa cada 10 minutos, de lunes a viernes entre 08:00 y 19:00.`);
-  if (enHorario()) {
-    return txt('error', `<b>⚠ El agente local no revisa hace ${min >= 1440 ? `${Math.floor(min / 1440)} días` : `${min} minutos`}</b> (última revisión ${cuando}). Revise que el PC del agente esté encendido, con sesión iniciada y OneDrive sincronizando. ${detalle}.`);
+  const { alDia, esperada } = agenteAlDia(d, new Date(), new Set(ctx.p.feriados || []));
+  if (alDia) {
+    return txt('ok', `<b>✓ Agente local al día:</b> última revisión ${cuando}. ${detalle}. Revisa una vez al día, los días hábiles a las ${HORA_AGENTE}:00. ${manual}`);
   }
-  return txt('', `<b>Agente local fuera de horario:</b> última revisión ${cuando}. Vuelve a revisar el próximo día hábil desde las 08:00. ${detalle}.`);
+  return txt('error', `<b>⚠ El agente local no hizo la revisión del ${esperada.split('-').reverse().join('-')} a las ${HORA_AGENTE}:00</b> (última revisión ${cuando}). Revise que el PC del agente haya estado encendido, con sesión iniciada y OneDrive sincronizando. ${manual} ${detalle}.`);
 }
 
 export function render(el, ctx) {
