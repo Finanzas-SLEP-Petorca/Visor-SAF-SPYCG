@@ -108,7 +108,7 @@ const G = {
       'El Visor nunca modifica las planillas: solo las lee.',
     ],
     ingresar: 'La administración importa las planillas con <b>Elegir carpeta</b> (la carpeta de OneDrive) o <b>Elegir archivos</b>. Antes de guardar se muestra la conciliación: compras nuevas, desaparecidas o con un detalle muy distinto (posible renumeración). La gestión y las observaciones se conservan.',
-    acciones: ['Con el agente local activo, esta tabla se actualiza sola cada 10 minutos.'],
+    acciones: ['Con el agente local activo, esta tabla se actualiza sola: el agente revisa las planillas cada 10 minutos (lunes a viernes, 08:00 a 19:00). El recuadro sobre la tabla muestra su última revisión; si pasan más de 30 minutos sin revisar en horario hábil, aparece en rojo.', '"Última sincronización" solo cambia cuando el contenido de una planilla cambia; si la unidad guarda sin cambios, no se reescribe.'],
   },
   parametros: {
     titulo: 'Parámetros',

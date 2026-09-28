@@ -99,6 +99,20 @@ Con el agente, lo que las unidades guardan en SharePoint aparece solo en el Viso
      /TR "cmd /c cd /d C:\Users\<usuario>\Documents\GitHub\Visor-SAF-SPYCG && node sync\agente-local.mjs >> sync\.estado\agente.log 2>&1"
    ```
 
+7. Ajuste la tarea para que no se salte días si el PC estaba apagado a las 08:00 y para que corra con batería:
+
+   ```powershell
+   $t = Get-ScheduledTask -TaskName "Visor SAF-SPYCG agente"
+   $t.Settings.StartWhenAvailable = $true
+   $t.Settings.DisallowStartIfOnBatteries = $false
+   $t.Settings.StopIfGoingOnBatteries = $false
+   Set-ScheduledTask -InputObject $t
+   ```
+
+En cada ejecución el agente deja una marca de revisión (`visor_base/_agente`). *Calidad y sincronización*
+muestra "Agente local activo: última revisión hace N min" y avisa en rojo si pasan más de 30 minutos sin
+revisar en horario hábil.
+
 El agente compara fecha y tamaño de cada archivo, copia a un temporal los que cambiaron (pueden estar
 abiertos en Excel), los normaliza y escribe solo si el contenido cambió. Solo registra conteos.
 
