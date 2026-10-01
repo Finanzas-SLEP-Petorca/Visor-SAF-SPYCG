@@ -24,7 +24,7 @@ function renderFuentes(el, ctx) {
   const sel = fuenteSel && grupos.find((g) => g.clave === fuenteSel) ? fuenteSel : null;
   const compras = sel ? ctx.calc.filter((c) => c.enTotales && sel in repartirPorFuente(c, 1)) : [];
   el.innerHTML = `<h2>Por subvención o fuente</h2>
-  <p class="small muted">La fuente la registran las Subdirecciones en cada compra; un contrato con varias fuentes se reparte según los montos indicados. Mientras nadie la defina, la compra queda en "Sin clasificar".</p>
+  <p class="small muted">La fuente la registran las Subdirecciones en cada compra; un contrato con varias fuentes se reparte según los montos indicados. Mientras no la definan, se usa la subvención que indica la planilla de la unidad (columna SUBVENCIÓN); si tampoco la trae, queda en "Sin clasificar".</p>
   <div class="grilla">${grupos.map((g) => `<button class="tarjeta kpi" style="text-align:left" data-fuente="${esc(g.clave)}" aria-pressed="${g.clave === sel}">
     <div class="etq">${esc(g.clave)} · ${Math.round(g.n)} compras</div><div class="val">${clp(g.pac)}</div>
     <div class="det">Adjudicado ${clp(g.adjudicado)} · Devengado ${clp(g.real)}<br>Proyectado (probable) ${clp(g.probable)} · En riesgo ${clp(g.riesgo)}${g.condicionado ? `<br>Condicionado ${clp(g.condicionado)}` : ''}</div></button>`).join('')}</div>

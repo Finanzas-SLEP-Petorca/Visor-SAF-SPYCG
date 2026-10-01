@@ -16,7 +16,7 @@ const NOMBRES = {
   OC_PREFIJO_PROGRAMA: 'OC de otro programa', OC_REPETIDA: 'OC repetida en la celda', COTIZACION_SIN_OC: 'Cotización sin OC', DESGLOSE_NO_CUADRA: 'Total de desglose no cuadra', DESGLOSE_VACIO: 'Desglose vacío con PAC',
   PLANILLA_DESACTUALIZADA: 'Planilla desactualizada', ENCABEZADO_DISTINTO: 'Encabezado distinto al estándar', NRO_VACIO: 'Sin N°',
   NRO_DUPLICADO: 'N° duplicado', MONTO_NO_NUMERICO: 'Monto no numérico', SEP_ADJUDICADA_SIN_MONTO: 'SEP adjudicado sin monto',
-  SEP_SIN_VISACION: 'SEP sin visación UATP', SEP_ETAPA_REF: 'SEP: "Etapa actual" con #REF!',
+  SUBVENCION_NO_RECONOCIDA: 'Subvención no reconocida', SEP_SIN_VISACION: 'SEP sin visación UATP', SEP_ETAPA_REF: 'SEP: "Etapa actual" con #REF!',
 };
 
 function conteo(advs) {

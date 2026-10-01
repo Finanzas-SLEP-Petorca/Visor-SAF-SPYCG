@@ -56,6 +56,7 @@ export function unificar(bases, gestion = {}, p) {
         id: f.id, origen: 'unidad', unidad: b.unidad, slug, programa: f.programa, subtitulo: f.subtitulo,
         asignacion: f.asignacion, detalle: f.detalle, tipoTexto: f.tipoCompra || f.tipoCompraInferido,
         pac: f.montoPAC, montoOC: f.montoOC, ocs: f.ocs || [], desglose: f.desglose, obsUnidad: f.obsUnidad,
+        subvencion: f.subvencion || null, fuentesPlanilla: f.fuentesPlanilla || [],
         estadoInferido: f.estadoInferido, estadoUnidad: f.estadoUnidad, base: f, g: gestion[f.id] || {},
         vinculo: unidadVinculada.get(f.id) || null, enTotales: true, advertencias: f.advertencias || [],
       });
@@ -271,8 +272,7 @@ export function calcularSemaforo(c, et, v, m, p, ctx) {
     if (m.real + 1 < prog30) rojo('DEVENGO_ATRASADO', 'Devengo atrasado más de 30 días respecto de lo programado');
     else if (progHoy > 0 && m.real < 0.8 * progHoy) amarillo('DEVENGO_BAJO', 'Devengo menor al 80% de lo programado a la fecha');
   }
-  const fuentes = c.g.direccion_fuentes || [];
-  if (!fuentes.length) amarillo('SIN_FUENTE', 'Sin fuente de financiamiento definida por las Subdirecciones');
+  if (!origenFuente(c)) amarillo('SIN_FUENTE', 'Sin fuente de financiamiento: ni la planilla de la unidad ni las Subdirecciones la indican');
   const fr = ctx.frescura?.[c.slug];
   if (fr && fr.dias > p.diasFrescura) amarillo('PLANILLA_DESACTUALIZADA', `Planilla de la unidad sin actualizar hace ${fr.dias} días`);
   const cons = consistencia(c);
@@ -346,11 +346,28 @@ export function estadoPAC(etapa) {
   return 'Pendiente';
 }
 
-/** Reparte un monto según direccion_fuentes (proporcional); lo no asignado va a "Sin clasificar". */
+/**
+ * De dónde sale la fuente de una compra: 'subdireccion' (direccion_fuentes, prevalece),
+ * 'planilla' (columna de subvención de la unidad) o null (sin fuente).
+ */
+export function origenFuente(c) {
+  if ((c.g?.direccion_fuentes || []).some((f) => f && f.fuente)) return 'subdireccion';
+  if ((c.fuentesPlanilla || []).length) return 'planilla';
+  return null;
+}
+
+/**
+ * Reparte un monto según direccion_fuentes (proporcional). Si las Subdirecciones no la definieron, usa la
+ * subvención de la planilla de la unidad (partes iguales si trae varias); si tampoco, "Sin clasificar".
+ */
 export function repartirPorFuente(c, monto) {
   const fs = (c.g.direccion_fuentes || []).filter((f) => f && f.fuente);
   const tot = suma(fs.map((f) => f.monto));
-  if (!fs.length) return { 'Sin clasificar': monto };
+  if (!fs.length) {
+    const fp = c.fuentesPlanilla || [];
+    if (fp.length) return Object.fromEntries(fp.map((f) => [f, monto / fp.length]));
+    return { 'Sin clasificar': monto };
+  }
   if (tot <= 0) return Object.fromEntries(fs.map((f) => [f.fuente, monto / fs.length]));
   const out = {};
   for (const f of fs) out[f.fuente] = (out[f.fuente] || 0) + monto * ((Number(f.monto) || 0) / tot);

@@ -27,7 +27,7 @@ function filas(lista) {
     const g = c.g;
     const o = {
       ID: c.id, Unidad: c.unidad, Programa: c.programa, Subtítulo: c.subtitulo, Asignación: c.asignacion, Detalle: c.detalle,
-      'Fuente(s)': Object.keys(repartirPorFuente(c, 1)).join(', '), 'Tipo/Modalidad': c.v.modalidadNombre,
+      'Fuente(s)': Object.keys(repartirPorFuente(c, 1)).join(', '), 'Subvención (planilla)': c.subvencion || '', 'Tipo/Modalidad': c.v.modalidadNombre,
       PAC: c.m.pac, 'Adjudicado/OC': c.m.adjudicado, Devengado: c.m.real, 'Fuente devengado': c.m.fuenteReal,
       Etapa: `${c.et.etapa} ${ETAPAS[c.et.etapa]}`, 'Marca etapa': c.et.marca, 'Estado proceso': g.compras_estadoProceso || '',
       'Estado general': g.direccion_estadoGeneral || '', 'Fecha límite inicio': c.v.aplica ? c.v.fechaLimite : '',
@@ -79,7 +79,7 @@ const valorTexto = (v) => {
 const ETIQUETAS_BASE = {
   programa: 'Programa', subtitulo: 'Subtítulo', asignacion: 'Asignación', adminContrato: 'Administrador contrato',
   detalle: 'Detalle', proveedor: 'Proveedor', temporalidad: 'Temporalidad', montoPAC: 'Monto PAC', montoOC: 'Monto OC',
-  ocTexto: 'N° OC (texto original)', idMercadoPublico: 'ID Mercado Público / cotización', tipoCompra: 'Tipo de compra',
+  ocTexto: 'N° OC (texto original)', idMercadoPublico: 'ID Mercado Público / cotización', tipoCompra: 'Tipo de compra', subvencion: 'Subvención',
   tipoCompraInferido: 'Tipo inferido de la OC', valorOT: 'Valor OT', avanceOT: '% avance OT', valorRecepcion: 'Recepción conforme',
   devengadoPlanilla: 'Facturado = devengado', pendienteOT: 'Pendiente OT', totalDesglose: 'Total desglose', obsUnidad: 'Observaciones de la unidad',
   estadoInferido: 'Estado inferido', item: 'Ítem', montoPresupuestado: 'Monto presupuestado', modalidad: 'Modalidad',

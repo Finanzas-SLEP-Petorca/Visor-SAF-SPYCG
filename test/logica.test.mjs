@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { restarHabiles, contarHabiles, esHabil, lunesDe } from '../src/logica/habiles.js';
 import {
-  unificar, calcularTodo, generarAlertas, agregar, accionesPorSubdireccion, calcularFrescura, estadoPAC, repartirPorFuente,
+  unificar, calcularTodo, generarAlertas, agregar, accionesPorSubdireccion, calcularFrescura, estadoPAC, repartirPorFuente, origenFuente,
 } from '../src/logica/motor.js';
 import { PARAMETROS_DEFECTO, mezclarParametros } from '../src/parametros-default.js';
 import { conciliar, entradasHistorial } from '../src/conciliacion.js';
@@ -221,4 +221,24 @@ test('agente local: una revisión diaria a las 12:00 en días hábiles', async (
   assert.equal(agenteAlDia(cl('2026-09-25T12:01:00'), cl('2026-09-28T15:00:00'), fer).alDia, false);
   assert.equal(agenteAlDia(cl('2026-09-25T12:01:00'), cl('2026-09-28T11:00:00'), fer).alDia, true);
   assert.equal(agenteAlDia(null, cl('2026-09-28T11:00:00'), fer).alDia, false);
+});
+
+test('fuente según la planilla de la unidad: se usa mientras las Subdirecciones no la definan', () => {
+  const b = { X: base([
+    { id: 'X-001', montoPAC: 1000, subvencion: 'SEP', fuentesPlanilla: ['SEP'] },
+    { id: 'X-002', montoPAC: 1000, subvencion: 'SEP / PIE', fuentesPlanilla: ['SEP', 'PIE'] },
+    { id: 'X-003', montoPAC: 1000, subvencion: 'SEP', fuentesPlanilla: ['SEP'] },
+    { id: 'X-004', montoPAC: 1000 },
+  ]) };
+  const g = { 'X-003': { direccion_fuentes: [{ fuente: 'FAEP', monto: 1000 }] } }; // la Subdirección prevalece
+  const r = calc(b, g);
+  const id = porId(r);
+  assert.equal(origenFuente(id['X-001']), 'planilla');
+  assert.equal(origenFuente(id['X-003']), 'subdireccion');
+  assert.equal(origenFuente(id['X-004']), null);
+  assert.deepEqual(repartirPorFuente(id['X-002'], 100), { SEP: 50, PIE: 50 });
+  const f = Object.fromEntries(agregar(r, 'fuente').map((x) => [x.clave, x.pac]));
+  assert.deepEqual(f, { SEP: 1500, PIE: 500, FAEP: 1000, 'Sin clasificar': 1000 });
+  const sinFuente = r.filter((c) => c.s.motivos.some((m) => m.codigo === 'SIN_FUENTE')).map((c) => c.id);
+  assert.deepEqual(sinFuente, ['X-004']);
 });
