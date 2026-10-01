@@ -17,11 +17,13 @@ let doceMeses = false;
 const seleccion = new Set();
 
 const fuentesDe = (c) => Object.keys(repartirPorFuente(c, 1));
+const textoFuentesPlanilla = (c) => (c.montosFuente && Object.keys(c.montosFuente).length
+  ? Object.entries(c.montosFuente).map(([f, v]) => `${f} ${clp(v)}`).join(' · ') : `"${c.subvencion}"`);
 /** Fuentes de la compra; las tomadas de la planilla de la unidad van en cursiva, hasta que una Subdirección las confirme. */
 function celdaFuentes(c) {
   const o = origenFuente(c);
   const tit = o === 'subdireccion' ? 'Definida por las Subdirecciones'
-    : o === 'planilla' ? `Según la planilla de la unidad ("${c.subvencion}"); la Subdirección puede confirmarla o cambiarla en el detalle`
+    : o === 'planilla' ? `Según la planilla de la unidad (${textoFuentesPlanilla(c)}); la Subdirección puede confirmarla o cambiarla en el detalle`
       : 'Ni la planilla ni las Subdirecciones indican la fuente';
   return fuentesDe(c).map((x) => `<span class="tag${o === 'planilla' ? ' planilla' : ''}" title="${esc(tit)}">${esc(x)}${o === 'planilla' ? ' ·p' : ''}</span>`).join('');
 }

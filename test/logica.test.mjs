@@ -242,3 +242,10 @@ test('fuente según la planilla de la unidad: se usa mientras las Subdirecciones
   const sinFuente = r.filter((c) => c.s.motivos.some((m) => m.codigo === 'SIN_FUENTE')).map((c) => c.id);
   assert.deepEqual(sinFuente, ['X-004']);
 });
+
+test('montos por fuente de la planilla: reparto proporcional', () => {
+  const b = { X: base([{ id: 'X-001', montoPAC: 1000, montosFuente: { SEP: 600, PIE: 200 }, fuentesPlanilla: ['SEP', 'PIE'] }]) };
+  const r = calc(b);
+  assert.equal(origenFuente(r[0]), 'planilla');
+  assert.deepEqual(repartirPorFuente(r[0], 100), { SEP: 75, PIE: 25 });
+});

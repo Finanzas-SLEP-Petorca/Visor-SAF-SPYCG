@@ -74,9 +74,11 @@ Los gráficos son SVG propios.
    patrón) y el Seguimiento SEP (nombre con "SEGUIMIENTO" y "SEP").
    El Seguimiento SEP es **solo de seguimiento**: no suma en los totales del Servicio, porque sus compras
    se registran en las planillas de las unidades (UATP y otras Subdirecciones).
-   Las columnas se reconocen por su **título**, no por su letra: si una unidad inserta columnas (por ejemplo
-   **SUBVENCIÓN**), el resto se sigue leyendo bien. La subvención de cada fila alimenta "Fuente(s)" mientras
-   las Subdirecciones no definan la fuente en el Visor (lo que definan prevalece). Para revisar la estructura
+   Las columnas se reconocen por su **título**, no por su letra: si una unidad inserta columnas, el resto se
+   sigue leyendo bien (las sin título, como N° y estado, se corren con su vecina). Los **montos por fuente**
+   (`CDP`, `MONTO APORTE FISCAL`, `MONTO SUBV GRAL|SEP|PIE|PRORETENCION|MANTENCION`, `MONTO FAEP`) alimentan
+   "Fuente(s)" en proporción mientras las Subdirecciones no definan la fuente en el Visor (lo que definan
+   prevalece); si no suman el PAC, Calidad lo advierte. Para revisar la estructura
    sin imprimir datos: `npm run encabezados` (solo títulos de columna y el campo que reconoce el Visor).
 3. Revise la **conciliación** (compras nuevas, desaparecidas o con detalle muy distinto) y las
    advertencias de calidad, y presione **Confirmar importación**. La gestión y las observaciones se
