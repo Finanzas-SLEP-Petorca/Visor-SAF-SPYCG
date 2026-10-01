@@ -165,6 +165,7 @@ main { padding: 1rem; max-width: 100%; }
 .marca.inferido { border-style: dashed; }
 .tag { display: inline-block; font-size: 11px; padding: 0 .35rem; border-radius: 4px; background: var(--surface-2); color: var(--ink-2); margin: 0 .15rem .15rem 0; }
 .tag.alerta { background: var(--st-rojo-bg); color: var(--st-rojo); }
+.tag.planilla { font-style: italic; outline: 1px dashed currentColor; outline-offset: -1px; }
 
 /* ---------- tablas ---------- */
 .tabla-wrap { overflow: auto; max-height: calc(100vh - 230px); border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }

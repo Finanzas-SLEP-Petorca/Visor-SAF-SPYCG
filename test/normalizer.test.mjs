@@ -179,3 +179,38 @@ test('SEP: ítems, sumas, etapa recalculada ignorando #REF! y vínculo por OC', 
   const v = detectarVinculos(s.items, { 'UNIDAD-DOS': infra });
   assert.deepEqual(v, [{ oc: '1506668-901-SE26', sepId: 'SEP-001', compraId: 'UNIDAD-DOS-003', unidad: 'UNIDAD DOS' }]);
 });
+
+test('columna SUBVENCIÓN insertada: se lee, se reconoce la fuente y el estado sin título se corre', () => {
+  // Planilla con una columna nueva entre PROGRAMA y SUBTÍTULO: todo lo que está a la derecha se corre una letra.
+  const enc = [...ENCABEZADOS_UNIDAD];
+  enc.splice(2, 0, 'SUBVENCIÓN');
+  const conSub = (sub, p) => { const f = fila(p); f.splice(2, 0, sub); return f; };
+  const r = normalizarPlanilla(libroUnidad('SEIS', [
+    conSub('SEP', { nro: 1, estado: 'EN PROCESO', meses: M({ 9: 100 }) }),
+    conSub('Subvención General / PIE', { nro: 2 }),
+    conSub(null, { nro: 3 }),
+    conSub('OTRO FONDO', { nro: 4 }),
+    conSub('FAEP 2026', { nro: 5 }),
+  ], { encabezados: enc }), 'ESTATUS DEVENGOS COMPRAS SEIS 2026.xlsx');
+  const [a, b, c, d, e] = r.filas;
+  assert.equal(a.subtitulo, '22');
+  assert.equal(a.asignacion, '2204001');
+  assert.equal(a.estadoUnidad, 'EN PROCESO'); // columna sin título, ahora en R
+  assert.equal(a.desglose.OCT, 100);
+  assert.equal(a.subvencion, 'SEP');
+  assert.deepEqual(a.fuentesPlanilla, ['SEP']);
+  assert.deepEqual(b.fuentesPlanilla, ['PIE', 'Subvención General']);
+  assert.equal(c.subvencion, null);
+  assert.deepEqual(c.fuentesPlanilla, []);
+  assert.deepEqual(d.fuentesPlanilla, []);
+  assert.deepEqual(e.fuentesPlanilla, ['FAEP']);
+  assert.equal(cuenta(r, 'SUBVENCION_NO_RECONOCIDA'), 1);
+  assert.equal(cuenta(r, 'DESGLOSE_NO_CUADRA'), 0);
+});
+
+test('planilla sin columna SUBVENCIÓN: sin cambios respecto del formato anterior', () => {
+  const r = normalizarPlanilla(libroUnidad('SIETE', [fila({ nro: 1, estado: 'FINALIZADO' })]), 'ESTATUS DEVENGOS COMPRAS SIETE 2026.xlsx');
+  assert.equal(r.filas[0].estadoUnidad, 'FINALIZADO');
+  assert.equal(r.filas[0].subvencion, null);
+  assert.deepEqual(r.filas[0].fuentesPlanilla, []);
+});

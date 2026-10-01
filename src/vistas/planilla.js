@@ -2,7 +2,7 @@
 import { estado, guardarGestion } from '../datos.js';
 import { puedeEscribir } from '../roles.js';
 import { ESTADOS_PROCESO, ESTADOS_GENERALES, MODALIDADES, ROLES_OBS, ROLES } from '../parametros-default.js';
-import { ETAPAS, repartirPorFuente } from '../logica/motor.js';
+import { ETAPAS, repartirPorFuente, origenFuente } from '../logica/motor.js';
 import { MESES } from '../util.js';
 import { esc, clp, fecha, fechaDe, pct } from '../formato.js';
 import { semaforo, etapa, opciones, toast, ordenar, activarTooltips, fuenteCifra, activarScrollSuperior } from '../ui.js';
@@ -17,6 +17,14 @@ let doceMeses = false;
 const seleccion = new Set();
 
 const fuentesDe = (c) => Object.keys(repartirPorFuente(c, 1));
+/** Fuentes de la compra; las tomadas de la planilla de la unidad van en cursiva, hasta que una Subdirección las confirme. */
+function celdaFuentes(c) {
+  const o = origenFuente(c);
+  const tit = o === 'subdireccion' ? 'Definida por las Subdirecciones'
+    : o === 'planilla' ? `Según la planilla de la unidad ("${c.subvencion}"); la Subdirección puede confirmarla o cambiarla en el detalle`
+      : 'Ni la planilla ni las Subdirecciones indican la fuente';
+  return fuentesDe(c).map((x) => `<span class="tag${o === 'planilla' ? ' planilla' : ''}" title="${esc(tit)}">${esc(x)}${o === 'planilla' ? ' ·p' : ''}</span>`).join('');
+}
 const ventanaEstado = (c) => (!c.v.aplica ? 'na' : c.v.margen < 0 ? 'vencida' : c.v.margen <= 10 ? 'proxima' : 'ok');
 
 export function filtrar(ctx) {
@@ -31,7 +39,7 @@ export function filtrar(ctx) {
     && (!f.etapa || String(c.et.etapa) === f.etapa)
     && (!f.semaforo || c.s.color === f.semaforo)
     && (!f.ventana || ventanaEstado(c) === f.ventana)
-    && (!t || `${c.id} ${c.detalle} ${c.asignacion} ${c.ocs.join(' ')} ${c.obsUnidad || ''}`.toLowerCase().includes(t)));
+    && (!t || `${c.id} ${c.detalle} ${c.asignacion} ${c.ocs.join(' ')} ${c.obsUnidad || ''} ${c.subvencion || ''}`.toLowerCase().includes(t)));
 }
 
 const CLAVES_ORDEN = {
@@ -74,7 +82,7 @@ function filaHTML(c, ctx) {
     <td class="col-fija nowrap"><input type="checkbox" class="chk-sel" data-sel="${esc(c.id)}"${sel ? ' checked' : ''} aria-label="Seleccionar ${esc(c.id)}"> <button class="chico" data-abrir="${esc(c.id)}" title="Abrir detalle">${esc(c.id)}</button>${flash ? `<span class="editado-por">editado por ${esc(nombreDe(rec.por))}</span>` : ''}</td>
     <td>${esc(c.unidad)}</td><td>${esc(c.programa || '')}</td><td>${esc(c.subtitulo || '')}</td><td>${esc(c.asignacion || '')}</td>
     <td class="detalle-celda">${esc(c.detalle || '')}${c.vinculo ? ' <span class="tag" title="Vinculada a otro origen por OC">🔗</span>' : ''}</td>
-    <td>${fuentesDe(c).map((x) => `<span class="tag">${esc(x)}</span>`).join('')}</td>
+    <td>${celdaFuentes(c)}</td>
     ${modal}
     <td class="num">${clp(c.m.pac)}</td><td class="num">${clp(c.m.adjudicado)}</td>${devengado}
     <td class="num">${pct(c.m.pac ? c.m.real / c.m.pac : NaN)}</td>

@@ -9,7 +9,8 @@
     "test:integracion": "node --test test/integracion.test.mjs",
     "test:reglas": "cd docs/privado && firebase emulators:exec --only firestore --project demo-visor \"node --test firestore.rules.test.mjs\"",
     "sync": "node sync/agente-local.mjs",
-    "sync:simular": "node sync/agente-local.mjs --simular"
+    "sync:simular": "node sync/agente-local.mjs --simular",
+    "encabezados": "node sync/encabezados.mjs"
   },
   "engines": {
     "node": ">=20"

@@ -50,7 +50,8 @@ const G = {
     que: 'Agrupa las compras según la fuente de financiamiento o subvención que registran las Subdirecciones, y muestra el Seguimiento SEP con el formato de fases.',
     leer: [
       'Cada tarjeta muestra PAC, adjudicado, devengado, proyección probable y monto en riesgo de esa fuente. Un contrato con varias fuentes se reparte según los montos indicados.',
-      '"Sin clasificar" reúne las compras a las que aún nadie les asignó fuente.',
+      'Si la Subdirección aún no define la fuente, se usa la <b>subvención que indica la planilla de la unidad</b> (columna SUBVENCIÓN), marcada en cursiva con "·p". Lo que registre la Subdirección siempre prevalece.',
+      '"Sin clasificar" reúne las compras sin fuente ni en la planilla ni en el Visor.',
       'Pestaña <b>SEP</b>: es solo de seguimiento y no suma en los totales. Muestra cada ítem con su fase recalculada (la columna "Etapa actual" de la planilla no se usa), visación UATP, devengado, pagado y el vínculo 🔗 con la compra de la unidad donde se controla',
     ],
     ingresar: 'La fuente se registra en el detalle de cada compra (sección Subdirecciones). Los vínculos SEP propuestos por similitud los confirma o descarta la administración en la pestaña SEP.',

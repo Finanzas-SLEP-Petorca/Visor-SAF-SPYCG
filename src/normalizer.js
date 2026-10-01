@@ -5,7 +5,7 @@
 
 import { MESES, MESES_LARGOS, normTxt, esVacio, parseMonto, slugUnidad, pad3 } from './util.js';
 
-export const VERSION_NORMALIZADOR = 1;
+export const VERSION_NORMALIZADOR = 2;
 
 export const PATRON_ARCHIVO_UNIDAD = /ESTATUS\s+DEVENGOS\s+COMPRAS\s+(.+?)\s+(20\d{2})\s*\.xls[xm]?$/i;
 
@@ -65,6 +65,7 @@ function campoDeEncabezado(h) {
   if (h.includes('DIFERENCIA')) return null;
   const mes = MESES_LARGOS.indexOf(h === 'SETIEMBRE' ? 'SEPTIEMBRE' : h);
   if (mes >= 0) return MESES[mes];
+  if (h.includes('SUBVENCION') || h.includes('FINANCIAMIENTO')) return 'subvencion';
   if (/^(N|NO|NRO|NUMERO|#)\s*[°º.]?$/.test(h) || /^N\s*[°º]$/.test(h)) return 'nro';
   if (h.includes('PENDIENTE')) return 'pendienteOT';
   if (h.includes('AVANCE')) return 'avanceOT';
@@ -86,6 +87,40 @@ function campoDeEncabezado(h) {
   if (h.startsWith('OBSERVACION')) return 'obsUnidad';
   if (h.startsWith('ESTADO')) return 'estadoUnidad';
   return null;
+}
+
+// Subvención o fuente de financiamiento escrita por la unidad → nombres de la lista de fuentes.
+// El orden importa: "APORTE FISCAL EXTRAORDINARIO" antes que "APORTE FISCAL".
+const FUENTES_PLANILLA = [
+  [/\bSEP\b|PREFERENCIAL/, 'SEP'],
+  [/\bPIE\b|INTEGRACION ESCOLAR/, 'PIE'],
+  [/\bFAEP\b|FONDO DE APOYO/, 'FAEP'],
+  [/MANTENIMIENTO|MANTENCION/, 'Mantenimiento'],
+  [/PRO\s*-?\s*RETENCION/, 'Pro Retención'],
+  [/APORTE FISCAL EXTRA/, 'Aporte Fiscal Extraordinario'],
+  [/APORTE FISCAL|\bAF\b/, 'Aporte Fiscal'],
+  [/JUNJI|\bVTF\b/, 'JUNJI/VTF'],
+  [/GENERAL|REGULAR|NORMAL/, 'Subvención General'],
+];
+
+/**
+ * Interpreta la celda de subvención: puede traer una o varias ("SEP / PIE").
+ * @returns {{ texto: string|null, fuentes: string[], reconocida: boolean }}
+ */
+export function normalizarSubvencion(v) {
+  if (esVacio(v)) return { texto: null, fuentes: [], reconocida: true };
+  const texto = String(v).trim().replace(/\s+/g, ' ');
+  const t = normTxt(texto);
+  const fuentes = [];
+  let resto = t;
+  for (const [re, nombre] of FUENTES_PLANILLA) {
+    const g = new RegExp(re.source, 'g');
+    if (g.test(resto)) {
+      fuentes.push(nombre);
+      resto = resto.replace(g, ' ');
+    }
+  }
+  return { texto, fuentes, reconocida: fuentes.length > 0 };
 }
 
 // ---------------------------------------------------------------- hoja → matriz
@@ -263,6 +298,22 @@ function detectarEncabezado(matriz) {
 }
 
 /**
+ * Solo encabezados (sin datos): qué campo reconoce el Visor en cada columna. Para diagnosticar cambios
+ * de estructura de las planillas sin imprimir cifras.
+ * @returns {{ hoja: string, filaExcel: number, columnas: {letra: string, encabezado: string, campo: string|null}[] }}
+ */
+export function diagnosticarEncabezados(libro) {
+  const hoja = libro.SheetNames.find((n) => normTxt(n) !== 'LISTA') || libro.SheetNames[0];
+  const matriz = hojaAMatriz(libro.Sheets[hoja]);
+  const filaEnc = detectarEncabezado(matriz);
+  const columnas = (matriz[filaEnc] || []).map((v, i) => {
+    const encabezado = esVacio(valor(v)) ? '' : String(valor(v)).trim().replace(/\s+/g, ' ');
+    return { letra: colALetra(i), encabezado, campo: campoDeEncabezado(normTxt(encabezado)) };
+  });
+  return { hoja, filaExcel: filaEnc + 1, columnas };
+}
+
+/**
  * Normaliza una planilla de unidad.
  * @param {object} libro   Libro de SheetJS.
  * @param {string} nombreArchivo
@@ -305,6 +356,18 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
       distintos.push(`${colALetra(i)}: "${h}" (se esperaba "${est}")`);
     }
   });
+  // Si la unidad insertó columnas nuevas (por ejemplo "SUBVENCIÓN"), los campos sin encabezado reconocible
+  // (como el estado de la columna Q, que suele no tener título) se corren igual que el campo reconocido
+  // más cercano a su izquierda, en vez de quedarse en su letra por defecto.
+  if (encontrados.size) {
+    const porDefecto = Object.entries(COLUMNAS_DEFECTO).map(([campo, l]) => [campo, letraACol(l)]).sort((a, b) => a[1] - b[1]);
+    for (const [campo, def] of porDefecto) {
+      if (encontrados.has(campo)) continue;
+      const ancla = porDefecto.filter(([k, d]) => d < def && encontrados.has(k)).pop();
+      if (ancla) col[campo] = def + (col[ancla[0]] - ancla[1]);
+    }
+  }
+  const tieneSubvencion = encontrados.has('subvencion');
   if (distintos.length) adv('ENCABEZADO_DISTINTO', `Encabezados distintos al estándar: ${distintos.join('; ')}`);
   // Columna de estado (Q) solo si su encabezado está vacío o dice ESTADO.
   const hQ = enc[col.estadoUnidad] || '';
@@ -394,6 +457,9 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
     // Estado declarado (columna Q) e inferido
     const q = usarEstado ? normTxt(celda(f, 'estadoUnidad')) : '';
     const estadoUnidad = ESTADOS_UNIDAD.includes(q) ? q : null;
+    // Subvención declarada por la unidad (columna nueva; solo si la planilla la trae)
+    const sv = tieneSubvencion ? normalizarSubvencion(celda(f, 'subvencion')) : { texto: null, fuentes: [], reconocida: true };
+    if (!sv.reconocida) advFila('SUBVENCION_NO_RECONOCIDA', `Fila ${filaExcel}: subvención "${sv.texto}" no corresponde a ninguna fuente de la lista`);
     const obsUnidad = esVacio(celda(f, 'obsUnidad')) ? null : String(celda(f, 'obsUnidad')).trim();
 
     const avCrudo = celda(f, 'avanceOT');
@@ -430,6 +496,8 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
       desglose,
       totalDesglose,
       obsUnidad,
+      subvencion: sv.texto,
+      fuentesPlanilla: sv.fuentes,
       estadoInferido: inferirEstado(obsUnidad),
       seguimientos: separarSeguimientos(obsUnidad),
       advertencias: [...new Set(codigos)],
