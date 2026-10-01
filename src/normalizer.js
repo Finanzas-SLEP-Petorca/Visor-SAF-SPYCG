@@ -65,6 +65,13 @@ function campoDeEncabezado(h) {
   if (h.includes('DIFERENCIA')) return null;
   const mes = MESES_LARGOS.indexOf(h === 'SETIEMBRE' ? 'SEPTIEMBRE' : h);
   if (mes >= 0) return MESES[mes];
+  // Monto por fuente ("MONTO SUBV SEP", "MONTO APORTE FISCAL", "MONTO FAEP"...): campo "fuente:<nombre>".
+  if (/^MONTO\b/.test(h) && !/\bPAC\b|ORDEN DE COMPRA|EJECUTADO/.test(h)) {
+    const f = normalizarSubvencion(h.replace(/^MONTO\s*\$?\s*(INICIAL\s*)?/, '')).fuentes;
+    if (f.length === 1) return `fuente:${f[0]}`;
+  }
+  if (h === 'CDP' || /^N\s*[°ºO]?\s*CDP$/.test(h)) return 'cdp';
+  if (h === 'LINEA') return 'linea';
   if (h.includes('SUBVENCION') || h.includes('FINANCIAMIENTO')) return 'subvencion';
   if (/^(N|NO|NRO|NUMERO|#)\s*[°º.]?$/.test(h) || /^N\s*[°º]$/.test(h)) return 'nro';
   if (h.includes('PENDIENTE')) return 'pendienteOT';
@@ -100,7 +107,7 @@ const FUENTES_PLANILLA = [
   [/APORTE FISCAL EXTRA/, 'Aporte Fiscal Extraordinario'],
   [/APORTE FISCAL|\bAF\b/, 'Aporte Fiscal'],
   [/JUNJI|\bVTF\b/, 'JUNJI/VTF'],
-  [/GENERAL|REGULAR|NORMAL/, 'Subvención General'],
+  [/GENERAL|\bGRAL\b|REGULAR|NORMAL/, 'Subvención General'],
 ];
 
 /**
@@ -298,6 +305,43 @@ function detectarEncabezado(matriz) {
 }
 
 /**
+ * Mapa campo → índice de columna a partir de la fila de encabezados (normalizados): letra por defecto,
+ * reemplazada por el encabezado si se reconoce.
+ */
+function mapearColumnas(enc) {
+  const col = {};
+  for (const [campo, letra] of Object.entries(COLUMNAS_DEFECTO)) col[campo] = letraACol(letra);
+  const encontrados = new Set();
+  let detalleEsProveedor = false;
+  const distintos = [];
+  enc.forEach((h, i) => {
+    const campo = campoDeEncabezado(h);
+    if (!campo || encontrados.has(campo)) return;
+    encontrados.add(campo);
+    col[campo] = i;
+    if (campo === 'detalle' && h.includes('PROVEEDOR') && !h.includes('DETALLE')) detalleEsProveedor = true;
+    const est = ENCABEZADO_ESTANDAR[campo];
+    const variante = (campo === 'ocs' && /^N\s*[°ºO]?\s*ORDEN DE COMPRA$/.test(h))
+      || (campo === 'tipoCompra' && /^TIPO DE COMPRA\s*\(.*\)$/.test(h));
+    if (est && h !== est && !variante) {
+      distintos.push(`${colALetra(i)}: "${h}" (se esperaba "${est}")`);
+    }
+  });
+  // Si la unidad insertó columnas nuevas (por ejemplo "SUBVENCIÓN"), los campos sin encabezado reconocible
+  // (como el estado de la columna Q, que suele no tener título) se corren igual que el campo reconocido
+  // más cercano a su izquierda, en vez de quedarse en su letra por defecto.
+  if (encontrados.size) {
+    const porDefecto = Object.entries(COLUMNAS_DEFECTO).map(([campo, l]) => [campo, letraACol(l)]).sort((a, b) => a[1] - b[1]);
+    for (const [campo, def] of porDefecto) {
+      if (encontrados.has(campo)) continue;
+      const ancla = porDefecto.filter(([k, d]) => d < def && encontrados.has(k)).pop();
+      if (ancla) col[campo] = def + (col[ancla[0]] - ancla[1]);
+    }
+  }
+  return { col, encontrados, detalleEsProveedor, distintos };
+}
+
+/**
  * Solo encabezados (sin datos): qué campo reconoce el Visor en cada columna. Para diagnosticar cambios
  * de estructura de las planillas sin imprimir cifras.
  * @returns {{ hoja: string, filaExcel: number, columnas: {letra: string, encabezado: string, campo: string|null}[] }}
@@ -306,9 +350,13 @@ export function diagnosticarEncabezados(libro) {
   const hoja = libro.SheetNames.find((n) => normTxt(n) !== 'LISTA') || libro.SheetNames[0];
   const matriz = hojaAMatriz(libro.Sheets[hoja]);
   const filaEnc = detectarEncabezado(matriz);
-  const columnas = (matriz[filaEnc] || []).map((v, i) => {
+  const fila = matriz[filaEnc] || [];
+  const { col, encontrados } = mapearColumnas(fila.map((v) => normTxt(valor(v))));
+  const porPosicion = new Map(Object.entries(col).filter(([k]) => !encontrados.has(k)).map(([k, i]) => [i, k]));
+  const columnas = fila.map((v, i) => {
     const encabezado = esVacio(valor(v)) ? '' : String(valor(v)).trim().replace(/\s+/g, ' ');
-    return { letra: colALetra(i), encabezado, campo: campoDeEncabezado(normTxt(encabezado)) };
+    const campo = campoDeEncabezado(normTxt(encabezado));
+    return { letra: colALetra(i), encabezado, campo, porPosicion: !campo && !encabezado ? porPosicion.get(i) || null : null };
   });
   return { hoja, filaExcel: filaEnc + 1, columnas };
 }
@@ -339,35 +387,9 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
   const filaEnc = detectarEncabezado(matriz);
   const enc = (matriz[filaEnc] || []).map((v) => normTxt(valor(v)));
 
-  // Mapa campo → índice de columna: letra por defecto, reemplazada por el encabezado si se reconoce.
-  const col = {};
-  for (const [campo, letra] of Object.entries(COLUMNAS_DEFECTO)) col[campo] = letraACol(letra);
-  const encontrados = new Set();
-  let detalleEsProveedor = false;
-  const distintos = [];
-  enc.forEach((h, i) => {
-    const campo = campoDeEncabezado(h);
-    if (!campo || encontrados.has(campo)) return;
-    encontrados.add(campo);
-    col[campo] = i;
-    if (campo === 'detalle' && h.includes('PROVEEDOR') && !h.includes('DETALLE')) detalleEsProveedor = true;
-    const est = ENCABEZADO_ESTANDAR[campo];
-    if (est && h !== est && !(campo === 'ocs' && /^N\s*[°ºO]?\s*ORDEN DE COMPRA$/.test(h))) {
-      distintos.push(`${colALetra(i)}: "${h}" (se esperaba "${est}")`);
-    }
-  });
-  // Si la unidad insertó columnas nuevas (por ejemplo "SUBVENCIÓN"), los campos sin encabezado reconocible
-  // (como el estado de la columna Q, que suele no tener título) se corren igual que el campo reconocido
-  // más cercano a su izquierda, en vez de quedarse en su letra por defecto.
-  if (encontrados.size) {
-    const porDefecto = Object.entries(COLUMNAS_DEFECTO).map(([campo, l]) => [campo, letraACol(l)]).sort((a, b) => a[1] - b[1]);
-    for (const [campo, def] of porDefecto) {
-      if (encontrados.has(campo)) continue;
-      const ancla = porDefecto.filter(([k, d]) => d < def && encontrados.has(k)).pop();
-      if (ancla) col[campo] = def + (col[ancla[0]] - ancla[1]);
-    }
-  }
+  const { col, encontrados, detalleEsProveedor, distintos } = mapearColumnas(enc);
   const tieneSubvencion = encontrados.has('subvencion');
+  const camposFuente = [...encontrados].filter((k) => k.startsWith('fuente:'));
   if (distintos.length) adv('ENCABEZADO_DISTINTO', `Encabezados distintos al estándar: ${distintos.join('; ')}`);
   // Columna de estado (Q) solo si su encabezado está vacío o dice ESTADO.
   const hQ = enc[col.estadoUnidad] || '';
@@ -457,9 +479,21 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
     // Estado declarado (columna Q) e inferido
     const q = usarEstado ? normTxt(celda(f, 'estadoUnidad')) : '';
     const estadoUnidad = ESTADOS_UNIDAD.includes(q) ? q : null;
-    // Subvención declarada por la unidad (columna nueva; solo si la planilla la trae)
+    // Fuentes declaradas por la unidad: montos por fuente (columnas "MONTO SUBV ...") o una columna de texto.
     const sv = tieneSubvencion ? normalizarSubvencion(celda(f, 'subvencion')) : { texto: null, fuentes: [], reconocida: true };
     if (!sv.reconocida) advFila('SUBVENCION_NO_RECONOCIDA', `Fila ${filaExcel}: subvención "${sv.texto}" no corresponde a ninguna fuente de la lista`);
+    let montosFuente = null;
+    if (camposFuente.length) {
+      montosFuente = {};
+      for (const k of camposFuente) { const v = monto(k); if (v) montosFuente[k.slice(7)] = (montosFuente[k.slice(7)] || 0) + v; }
+      const sumaF = Object.values(montosFuente).reduce((a, b) => a + b, 0);
+      if (sumaF > 0 && montoPAC > 0 && Math.abs(sumaF - montoPAC) > 1) {
+        advFila('FUENTES_NO_CUADRAN', `Fila ${filaExcel}: la suma de los montos por fuente no cuadra con el PAC`);
+      }
+      if (sumaF === 0 && montoPAC > 0) advFila('FUENTES_VACIAS', `Fila ${filaExcel}: PAC sin monto en ninguna fuente`);
+    }
+    const fuentesPlanilla = montosFuente && Object.keys(montosFuente).length ? Object.keys(montosFuente) : sv.fuentes;
+    const texto = (k) => (esVacio(celda(f, k)) ? null : String(celda(f, k)).trim());
     const obsUnidad = esVacio(celda(f, 'obsUnidad')) ? null : String(celda(f, 'obsUnidad')).trim();
 
     const avCrudo = celda(f, 'avanceOT');
@@ -497,7 +531,10 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
       totalDesglose,
       obsUnidad,
       subvencion: sv.texto,
-      fuentesPlanilla: sv.fuentes,
+      montosFuente,
+      fuentesPlanilla,
+      cdp: col.cdp !== undefined ? texto('cdp') : null,
+      linea: col.linea !== undefined ? texto('linea') : null,
       estadoInferido: inferirEstado(obsUnidad),
       seguimientos: separarSeguimientos(obsUnidad),
       advertencias: [...new Set(codigos)],

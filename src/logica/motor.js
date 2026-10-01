@@ -56,7 +56,7 @@ export function unificar(bases, gestion = {}, p) {
         id: f.id, origen: 'unidad', unidad: b.unidad, slug, programa: f.programa, subtitulo: f.subtitulo,
         asignacion: f.asignacion, detalle: f.detalle, tipoTexto: f.tipoCompra || f.tipoCompraInferido,
         pac: f.montoPAC, montoOC: f.montoOC, ocs: f.ocs || [], desglose: f.desglose, obsUnidad: f.obsUnidad,
-        subvencion: f.subvencion || null, fuentesPlanilla: f.fuentesPlanilla || [],
+        subvencion: f.subvencion || null, montosFuente: f.montosFuente || null, fuentesPlanilla: f.fuentesPlanilla || [],
         estadoInferido: f.estadoInferido, estadoUnidad: f.estadoUnidad, base: f, g: gestion[f.id] || {},
         vinculo: unidadVinculada.get(f.id) || null, enTotales: true, advertencias: f.advertencias || [],
       });
@@ -358,12 +358,16 @@ export function origenFuente(c) {
 
 /**
  * Reparte un monto según direccion_fuentes (proporcional). Si las Subdirecciones no la definieron, usa la
- * subvención de la planilla de la unidad (partes iguales si trae varias); si tampoco, "Sin clasificar".
+ * planilla de la unidad: sus montos por fuente (proporcional) o su columna de subvención (partes iguales);
+ * si tampoco, "Sin clasificar".
  */
 export function repartirPorFuente(c, monto) {
   const fs = (c.g.direccion_fuentes || []).filter((f) => f && f.fuente);
   const tot = suma(fs.map((f) => f.monto));
   if (!fs.length) {
+    const mf = Object.entries(c.montosFuente || {}).filter(([, v]) => v > 0);
+    const totF = suma(mf.map(([, v]) => v));
+    if (totF > 0) return Object.fromEntries(mf.map(([f, v]) => [f, monto * (v / totF)]));
     const fp = c.fuentesPlanilla || [];
     if (fp.length) return Object.fromEntries(fp.map((f) => [f, monto / fp.length]));
     return { 'Sin clasificar': monto };

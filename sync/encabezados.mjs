@@ -34,12 +34,14 @@ try {
     const d = diagnosticarEncabezados(XLSX.read(readFileSync(copia), { type: 'buffer' }));
     console.log(`\n=== ${ascii(n)}  (encabezados en la fila ${d.filaExcel})`);
     for (const c of d.columnas) {
-      if (!c.encabezado && !c.campo) continue;
-      console.log(`  ${c.letra.padEnd(3)} ${ascii(c.encabezado || '(sin titulo)').slice(0, 60).padEnd(60)} -> ${c.campo || '(no se usa)'}`);
+      if (!c.encabezado && !c.campo && !c.porPosicion) continue;
+      const campo = c.campo || (c.porPosicion ? `${c.porPosicion} (por posicion)` : '(no se usa)');
+      console.log(`  ${c.letra.padEnd(3)} ${ascii(c.encabezado || '(sin titulo)').slice(0, 60).padEnd(60)} -> ${ascii(campo)}`);
     }
-    const vistos = new Set(d.columnas.map((c) => c.campo));
+    const vistos = new Set(d.columnas.flatMap((c) => [c.campo, c.porPosicion]));
     const faltan = ESPERADOS.filter((k) => !vistos.has(k));
-    console.log(`  Subvencion: ${vistos.has('subvencion') ? 'SI' : 'no'}${faltan.length ? ` | sin encabezado reconocido: ${faltan.join(', ')}` : ''}`);
+    const fuentes = d.columnas.filter((c) => c.campo?.startsWith('fuente:')).length;
+    console.log(`  Montos por fuente: ${fuentes} columnas${vistos.has('subvencion') ? ' | columna de subvencion: SI' : ''}${faltan.length ? ` | sin columna: ${faltan.join(', ')}` : ''}`);
   }
 } finally {
   rmSync(tmp, { recursive: true, force: true });

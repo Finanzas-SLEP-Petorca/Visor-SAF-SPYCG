@@ -7,7 +7,7 @@ import { similitud } from './util.js';
 export const CAMPOS_COMPARADOS = [
   'programa', 'subtitulo', 'asignacion', 'adminContrato', 'detalle', 'temporalidad',
   'montoPAC', 'montoOC', 'ocs', 'tipoCompra', 'valorOT', 'avanceOT', 'valorRecepcion',
-  'devengadoPlanilla', 'pendienteOT', 'estadoUnidad', 'desglose', 'totalDesglose', 'obsUnidad', 'subvencion',
+  'devengadoPlanilla', 'pendienteOT', 'estadoUnidad', 'desglose', 'totalDesglose', 'obsUnidad', 'subvencion', 'montosFuente', 'cdp', 'linea',
   // SEP
   'item', 'montoPresupuestado', 'modalidad', 'idMercadoPublico', 'estadoCompra', 'documentoFormaliza',
   'montoAdjudicado', 'estadoEjecucion', 'verificadores', 'visacionUATP', 'montoDevengado', 'montoPagado', 'observaciones',

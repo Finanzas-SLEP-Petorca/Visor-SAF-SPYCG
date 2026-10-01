@@ -27,7 +27,7 @@ function filas(lista) {
     const g = c.g;
     const o = {
       ID: c.id, Unidad: c.unidad, Programa: c.programa, Subtítulo: c.subtitulo, Asignación: c.asignacion, Detalle: c.detalle,
-      'Fuente(s)': Object.keys(repartirPorFuente(c, 1)).join(', '), 'Subvención (planilla)': c.subvencion || '', 'Tipo/Modalidad': c.v.modalidadNombre,
+      'Fuente(s)': Object.keys(repartirPorFuente(c, 1)).join(', '), 'Fuentes (planilla)': c.montosFuente ? Object.entries(c.montosFuente).map(([f, v]) => `${f} ${v}`).join(' | ') : (c.subvencion || ''), 'Tipo/Modalidad': c.v.modalidadNombre,
       PAC: c.m.pac, 'Adjudicado/OC': c.m.adjudicado, Devengado: c.m.real, 'Fuente devengado': c.m.fuenteReal,
       Etapa: `${c.et.etapa} ${ETAPAS[c.et.etapa]}`, 'Marca etapa': c.et.marca, 'Estado proceso': g.compras_estadoProceso || '',
       'Estado general': g.direccion_estadoGeneral || '', 'Fecha límite inicio': c.v.aplica ? c.v.fechaLimite : '',
@@ -79,7 +79,7 @@ const valorTexto = (v) => {
 const ETIQUETAS_BASE = {
   programa: 'Programa', subtitulo: 'Subtítulo', asignacion: 'Asignación', adminContrato: 'Administrador contrato',
   detalle: 'Detalle', proveedor: 'Proveedor', temporalidad: 'Temporalidad', montoPAC: 'Monto PAC', montoOC: 'Monto OC',
-  ocTexto: 'N° OC (texto original)', idMercadoPublico: 'ID Mercado Público / cotización', tipoCompra: 'Tipo de compra', subvencion: 'Subvención',
+  ocTexto: 'N° OC (texto original)', idMercadoPublico: 'ID Mercado Público / cotización', tipoCompra: 'Tipo de compra', subvencion: 'Subvención', cdp: 'CDP (planilla)', linea: 'Línea',
   tipoCompraInferido: 'Tipo inferido de la OC', valorOT: 'Valor OT', avanceOT: '% avance OT', valorRecepcion: 'Recepción conforme',
   devengadoPlanilla: 'Facturado = devengado', pendienteOT: 'Pendiente OT', totalDesglose: 'Total desglose', obsUnidad: 'Observaciones de la unidad',
   estadoInferido: 'Estado inferido', item: 'Ítem', montoPresupuestado: 'Monto presupuestado', modalidad: 'Modalidad',
@@ -98,6 +98,7 @@ export function datosCompra(c, ctx) {
   add('Compra', 'Origen', c.origen === 'SEP' ? 'Seguimiento SEP (solo seguimiento, no suma en totales)' : 'Planilla de la unidad');
   for (const [k, et] of Object.entries(ETIQUETAS_BASE)) if (c.base[k] !== undefined && c.base[k] !== null && c.base[k] !== '') add('Planilla', et, c.base[k]);
   if (c.base.ocs?.length) add('Planilla', 'OC detectadas', c.base.ocs);
+  for (const [fu, v] of Object.entries(c.base.montosFuente || {})) add('Planilla', `Monto ${fu}`, v);
   add('Cálculo', 'Etapa', `${c.et.etapa} · ${ETAPAS[c.et.etapa]} (${c.et.marca}, ${c.et.fuente})`);
   add('Cálculo', 'Semáforo', c.s.color);
   if (c.s.motivos.length) add('Cálculo', 'Motivos', c.s.motivos.map((m) => m.texto).join(' | '));

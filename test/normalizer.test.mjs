@@ -214,3 +214,33 @@ test('planilla sin columna SUBVENCIÓN: sin cambios respecto del formato anterio
   assert.equal(r.filas[0].subvencion, null);
   assert.deepEqual(r.filas[0].fuentesPlanilla, []);
 });
+
+test('estructura con montos por fuente (CDP + MONTO SUBV ...): se leen y el resto se corre bien', () => {
+  const NUEVAS = ['CDP', 'MONTO APORTE FISCAL', 'MONTO SUBV GRAL', 'MONTO SUBV SEP', 'MONTO SUBV PIE',
+    'MONTO SUBV PRORETENCION', 'MONTO SUBV MANTENCION', 'MONTO FAEP'];
+  const enc = [...ENCABEZADOS_UNIDAD];
+  enc[0] = null; // N° sin título, como en las planillas actuales
+  enc[10] = 'TIPO DE COMPRA (AGIL-CONVENIO MARCO-LICITACION-TD)';
+  enc.splice(8, 0, ...NUEVAS);
+  const conFuentes = (vals, p) => { const f = fila(p); f.splice(8, 0, ...vals); return f; };
+  const r = normalizarPlanilla(libroUnidad('OCHO', [
+    conFuentes(['CDP-1', 0, 0, 600000, 400000, 0, 0, 0], { nro: 1, estado: 'EN PROCESO', meses: M({ 10: 50 }) }),
+    conFuentes([null, 0, 0, 0, 0, 0, 0, 0], { nro: 2 }),
+    conFuentes([null, 0, 300000, 0, 0, 0, 0, 0], { nro: 3 }),
+  ], { encabezados: enc }), 'ESTATUS DEVENGOS COMPRAS OCHO 2026.xlsx');
+  const [a, b, c] = r.filas;
+  assert.equal(a.id, 'OCHO-001');
+  assert.equal(a.montoPAC, 1000000);
+  assert.equal(a.tipoCompra, 'COMPRA ÁGIL');
+  assert.equal(a.estadoUnidad, 'EN PROCESO');
+  assert.equal(a.desglose.NOV, 50);
+  assert.equal(a.cdp, 'CDP-1');
+  assert.deepEqual(a.montosFuente, { SEP: 600000, PIE: 400000 });
+  assert.deepEqual(a.fuentesPlanilla, ['SEP', 'PIE']);
+  assert.deepEqual(b.fuentesPlanilla, []);
+  assert.deepEqual(c.montosFuente, { 'Subvención General': 300000 });
+  assert.equal(cuenta(r, 'FUENTES_VACIAS'), 1);
+  assert.equal(cuenta(r, 'FUENTES_NO_CUADRAN'), 1);
+  assert.equal(cuenta(r, 'ENCABEZADO_DISTINTO'), 0);
+  assert.equal(cuenta(r, 'DESGLOSE_NO_CUADRA'), 0);
+});
