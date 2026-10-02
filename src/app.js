@@ -1,23 +1,23 @@
 // Punto de entrada: acceso, rol, suscripciones y enrutamiento de vistas.
-import { enviarEnlace, completarEnlace, cerrarSesion, alCambiarSesion } from './firebase.js';
-import { estado, resolverRol, iniciarSuscripciones, detener, alCambiar, guardarRoles } from './datos.js';
-import { unificar, calcularTodo, generarAlertas, calcularFrescura } from './logica/motor.js';
-import { hoyISO } from './logica/habiles.js';
-import { esc, hace, aDate } from './formato.js';
-import { nombreRol, toast, activarScrollSuperior } from './ui.js';
-import { abrirDetalle, refrescarDetalle } from './vistas/detalle.js';
-import { pintarGuia } from './guias.js';
-import { icono, esV2 } from './iconos.js';
-import * as resumen from './vistas/resumen.js';
-import * as planilla from './vistas/planilla.js';
-import * as fuentes from './vistas/fuentes.js';
-import * as unidades from './vistas/unidades.js';
-import * as calendario from './vistas/calendario.js';
-import * as observaciones from './vistas/observaciones.js';
-import * as proveedores from './vistas/proveedores.js';
-import * as calidad from './vistas/calidad.js';
-import * as parametros from './vistas/parametros.js';
-import * as historial from './vistas/historial.js';
+import { enviarEnlace, completarEnlace, cerrarSesion, alCambiarSesion } from './firebase.js?v=202610022053';
+import { estado, resolverRol, iniciarSuscripciones, detener, alCambiar, guardarRoles } from './datos.js?v=202610022053';
+import { unificar, calcularTodo, generarAlertas, calcularFrescura } from './logica/motor.js?v=202610022053';
+import { hoyISO } from './logica/habiles.js?v=202610022053';
+import { esc, hace, aDate } from './formato.js?v=202610022053';
+import { nombreRol, toast, activarScrollSuperior } from './ui.js?v=202610022053';
+import { abrirDetalle, refrescarDetalle } from './vistas/detalle.js?v=202610022053';
+import { pintarGuia } from './guias.js?v=202610022053';
+import { icono, esV2 } from './iconos.js?v=202610022053';
+import * as resumen from './vistas/resumen.js?v=202610022053';
+import * as planilla from './vistas/planilla.js?v=202610022053';
+import * as fuentes from './vistas/fuentes.js?v=202610022053';
+import * as unidades from './vistas/unidades.js?v=202610022053';
+import * as calendario from './vistas/calendario.js?v=202610022053';
+import * as observaciones from './vistas/observaciones.js?v=202610022053';
+import * as proveedores from './vistas/proveedores.js?v=202610022053';
+import * as calidad from './vistas/calidad.js?v=202610022053';
+import * as parametros from './vistas/parametros.js?v=202610022053';
+import * as historial from './vistas/historial.js?v=202610022053';
 
 const VISTAS = { resumen, planilla, fuentes, unidades, calendario, observaciones, proveedores, calidad, parametros, historial };
 const $ = (id) => document.getElementById(id);
@@ -25,7 +25,7 @@ const mostrar = (id) => ['acceso', 'primer-ingreso', 'app'].forEach((x) => $(x).
 
 // ------------------------------------------------------------------ interfaz v2 (index.html; index-v1.html es la versión anterior)
 if (esV2()) {
-  document.querySelectorAll('[data-ico]').forEach((el) => el.insertAdjacentHTML('afterbegin', icono(el.dataset.ico, el.closest('nav') ? 22 : 18)));
+  document.querySelectorAll('[data-ico]:not([data-ico-ok])').forEach((el) => el.insertAdjacentHTML('afterbegin', icono(el.dataset.ico, el.closest('nav') ? 22 : 18)));
   $('btn-exportar').addEventListener('click', () => {
     const v = $('vista');
     const b = v.querySelector('[data-exportar]') || [...v.querySelectorAll('button')].find((x) => /excel|pdf/i.test(x.textContent) && !x.closest('.barra-sel'));
