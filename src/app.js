@@ -7,6 +7,7 @@ import { esc, hace, aDate } from './formato.js';
 import { nombreRol, toast, activarScrollSuperior } from './ui.js';
 import { abrirDetalle, refrescarDetalle } from './vistas/detalle.js';
 import { pintarGuia } from './guias.js';
+import { icono, esV2 } from './iconos.js';
 import * as resumen from './vistas/resumen.js';
 import * as planilla from './vistas/planilla.js';
 import * as fuentes from './vistas/fuentes.js';
@@ -21,6 +22,16 @@ import * as historial from './vistas/historial.js';
 const VISTAS = { resumen, planilla, fuentes, unidades, calendario, observaciones, proveedores, calidad, parametros, historial };
 const $ = (id) => document.getElementById(id);
 const mostrar = (id) => ['acceso', 'primer-ingreso', 'app'].forEach((x) => $(x).classList.toggle('oculto', x !== id));
+
+// ------------------------------------------------------------------ interfaz v2 (index.html; index-v1.html es la versión anterior)
+if (esV2()) {
+  document.querySelectorAll('[data-ico]').forEach((el) => el.insertAdjacentHTML('afterbegin', icono(el.dataset.ico, el.closest('nav') ? 22 : 18)));
+  $('btn-exportar').addEventListener('click', () => {
+    const v = $('vista');
+    const b = v.querySelector('[data-exportar]') || [...v.querySelectorAll('button')].find((x) => /excel|pdf/i.test(x.textContent) && !x.closest('.barra-sel'));
+    if (b) b.click(); else toast('Esta pestaña no tiene exportación.');
+  });
+}
 
 // ------------------------------------------------------------------ tema
 const TEMA = 'visorTema';
@@ -146,6 +157,15 @@ function cabecera() {
   }
   const nombre = (em) => estado.rolesDoc?.usuarios?.[em]?.nombre || em;
   $('cab-edicion').textContent = ult ? `Última edición por ${nombre(ult.por)}, ${hace(ult.d)}` : '';
+  if ($('cab-nombre')) {
+    $('cab-nombre').textContent = estado.nombre || estado.email || '';
+    $('cab-rol').textContent = `${nombreRol(estado.rol)}${estado.esAdmin ? ' · admin' : ''}`;
+    $('cab-avatar').textContent = (estado.nombre || estado.email || '?').trim().charAt(0).toUpperCase();
+    const rojas = ctx ? ctx.alertas.filter((a) => a.severidad === 'roja').length : 0;
+    $('cab-alertas').textContent = rojas > 999 ? '999+' : String(rojas);
+    $('cab-alertas').title = `${rojas} alertas rojas · ver Resumen ejecutivo`;
+    $('cab-alertas').classList.toggle('oculto', !rojas);
+  }
 }
 
 // ------------------------------------------------------------------ enrutamiento
@@ -182,7 +202,7 @@ function render(forzar = false) {
   const nav = $('pestanas');
   const fija = getComputedStyle(nav).position === 'sticky';
   document.documentElement.style.setProperty('--alto-barra', `${cabH}px`);
-  document.documentElement.style.setProperty('--alto-cabecera', `${fija ? cabH + nav.offsetHeight : 0}px`);
+  document.documentElement.style.setProperty('--alto-cabecera', `${esV2() ? cabH : fija ? cabH + nav.offsetHeight : 0}px`);
   if (!cambio && (scroll || scrollX)) {
     const w = el.querySelector('.tabla-wrap');
     if (w) { w.scrollTop = scroll || 0; w.scrollLeft = scrollX || 0; }

@@ -2,6 +2,7 @@
 import { esc, fecha, clp } from './formato.js';
 import { ETAPAS } from './logica/motor.js';
 import { ROLES } from './parametros-default.js';
+import { icono, esV2 } from './iconos.js';
 
 const SEM = {
   rojo: ['⛔', 'Rojo'], amarillo: ['⚠', 'Amarillo'], verde: ['✓', 'Verde'], azul: ['●', 'Ejecutada'], gris: ['⊘', 'Desistida'],
@@ -67,8 +68,13 @@ export function fuenteCifra(ctx, extra = '') {
   return `<div class="fuente-cifra">Fuente: planillas de unidades (última modificación ${corte})${ctx.hayBaseSEP ? ' y Seguimiento SEP' : ''}; real = desglose hasta ${mes} o devengo SIGFE si Finanzas lo registró${extra ? `; ${esc(extra)}` : ''}.</div>`;
 }
 
-export function kpi(etq, val, det = '') {
-  return `<div class="tarjeta kpi"><div class="etq">${esc(etq)}</div><div class="val">${val}</div>${det ? `<div class="det">${det}</div>` : ''}</div>`;
+/**
+ * Tarjeta de cifra. `op.tono` (azul, verde, ambar, rojo, violeta, turquesa) y `op.icono` solo cambian el
+ * aspecto en la interfaz v2; la interfaz actual los ignora.
+ */
+export function kpi(etq, val, det = '', op = {}) {
+  const ico = op.icono && esV2() ? `<span class="kpi-ico">${icono(op.icono, 22)}</span>` : '';
+  return `<div class="tarjeta kpi${op.tono ? ` kpi-${op.tono}` : ''}">${ico}<div class="etq">${esc(etq)}</div><div class="val">${val}</div>${det ? `<div class="det">${det}</div>` : ''}</div>`;
 }
 
 /** Descarga un texto como archivo. */
