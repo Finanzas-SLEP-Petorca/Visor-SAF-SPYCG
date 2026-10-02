@@ -56,15 +56,15 @@ export function render(el, ctx) {
 
   el.innerHTML = `${encabezadoImpresion(ctx, 'Visor SAF/SPYCG — Resumen ejecutivo')}
   <div class="fila no-imprimir" style="margin-bottom:.75rem"><h2 style="margin:0">Resumen ejecutivo</h2><div class="espacio"></div>
-    <button id="rs-pdf">PDF ejecutivo</button></div>
+    <button id="rs-pdf" data-exportar>PDF ejecutivo</button></div>
   <div class="grilla">
-    ${kpi('PAC 2026', clpCorto(T.pac), `${act.length} compras · ${clp(T.pac)}`)}
-    ${kpi('Adjudicado u OC (anual)', clpCorto(T.adjudicado), pct(T.pac ? T.adjudicado / T.pac : NaN) + ' del PAC')}
-    ${kpi('Devengado', clpCorto(T.real), 'Según planilla salvo devengo SIGFE registrado')}
-    ${kpi('% de ejecución', pct(T.pac ? T.real / T.pac : NaN), 'Devengado / PAC')}
-    ${kpi('Proyección de cierre (probable)', clpCorto(T.probable), `Conservador ${clpCorto(T.conservador)} · Planificado ${clpCorto(T.planificado)}`)}
-    ${kpi('Alertas rojas', String(rojas), `Monto en riesgo ${clpCorto(riesgo)}`)}
-    ${sep.length ? `<a class="tarjeta kpi" href="#fuentes" style="text-decoration:none;color:inherit;border:1px dashed var(--line-2)"><div class="etq">Seguimiento SEP · no suma en los totales</div>
+    ${kpi('PAC 2026', clpCorto(T.pac), `${act.length} compras · ${clp(T.pac)}`, { tono: 'azul', icono: 'documento' })}
+    ${kpi('Adjudicado u OC (anual)', clpCorto(T.adjudicado), pct(T.pac ? T.adjudicado / T.pac : NaN) + ' del PAC', { tono: 'violeta', icono: 'planilla' })}
+    ${kpi('Devengado', clpCorto(T.real), 'Según planilla salvo devengo SIGFE registrado', { tono: 'verde', icono: 'ok' })}
+    ${kpi('% de ejecución', pct(T.pac ? T.real / T.pac : NaN), 'Devengado / PAC', { tono: 'turquesa', icono: 'tendencia' })}
+    ${kpi('Proyección de cierre (probable)', clpCorto(T.probable), `Conservador ${clpCorto(T.conservador)} · Planificado ${clpCorto(T.planificado)}`, { tono: 'ambar', icono: 'moneda' })}
+    ${kpi('Alertas rojas', String(rojas), `Monto en riesgo ${clpCorto(riesgo)}`, { tono: 'rojo', icono: 'alerta' })}
+    ${sep.length ? `<a class="tarjeta kpi kpi-sep" href="#fuentes" style="text-decoration:none;color:inherit;border:1px dashed var(--line-2)"><div class="etq">Seguimiento SEP · no suma en los totales</div>
       <div class="val">${clpCorto(sepT.pres)}</div><div class="det">${sep.length} ítems · adjudicado ${clpCorto(sepT.adj)} · devengado ${clpCorto(sepT.dev)}<br>${sepT.vinc} vinculados a compras de las unidades · ver pestaña SEP</div></a>` : ''}
   </div>
   <details class="supuestos" style="margin-top:.75rem"><summary>Supuestos de la proyección</summary><ul>

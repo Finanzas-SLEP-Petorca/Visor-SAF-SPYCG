@@ -30,6 +30,7 @@ Unidades requirentes ─ editan ─► Planillas Excel en SharePoint (el Visor n
 | Carpeta / archivo | Contenido |
 |---|---|
 | `index.html`, `css/`, `src/app.js`, `src/vistas/` | Interfaz (módulos ES, sin compilación) |
+| `css/visor-v2.css`, `src/iconos.js` | Formato común de los paneles de Finanzas (encabezado con íconos, tarjetas con degradado, chips con conteo). `index-v1.html` conserva la interfaz anterior como respaldo |
 | `src/normalizer.js`, `src/normalizer-sep.js` | Normalizadores puros (navegador, agente y conector) |
 | `src/conciliacion.js`, `src/importacion.js` | Conciliación de IDs y preparación de cada importación |
 | `src/logica/` | Días hábiles, etapas, ventanas, semáforo, proyección, alertas y acciones |

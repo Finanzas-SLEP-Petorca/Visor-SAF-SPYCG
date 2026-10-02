@@ -2,11 +2,12 @@
 import { estado, guardarGestion } from '../datos.js';
 import { puedeEscribir } from '../roles.js';
 import { ESTADOS_PROCESO, ESTADOS_GENERALES, MODALIDADES, ROLES_OBS, ROLES } from '../parametros-default.js';
-import { ETAPAS, repartirPorFuente, origenFuente } from '../logica/motor.js';
+import { ETAPAS, repartirPorFuente, origenFuente, montoEnRiesgo } from '../logica/motor.js';
 import { MESES } from '../util.js';
 import { esc, clp, fecha, fechaDe, pct } from '../formato.js';
 import { semaforo, etapa, opciones, toast, ordenar, activarTooltips, fuenteCifra, activarScrollSuperior } from '../ui.js';
 import { exportarExcel, exportarCSV } from './exportar.js';
+import { icono, esV2 } from '../iconos.js';
 
 const f = {
   unidad: '', subdir: '', programa: '', subtitulo: '', fuente: '', modalidad: '', etapa: '', semaforo: '', ventana: '', texto: '',
@@ -80,7 +81,7 @@ function filaHTML(c, ctx) {
   const tieneC = contactos.length > 0 || g.compras_contactoRealizado;
   const motivos = c.s.motivos.map((m) => esc(m.texto)).join('<br>');
   const sel = seleccion.has(c.id);
-  return `<tr data-id="${esc(c.id)}" class="${flash ? 'flash' : ''}${sel ? ' sel' : ''}">
+  return `<tr data-id="${esc(c.id)}" class="s-${c.s.color}${flash ? ' flash' : ''}${sel ? ' sel' : ''}">
     <td class="col-fija nowrap"><input type="checkbox" class="chk-sel" data-sel="${esc(c.id)}"${sel ? ' checked' : ''} aria-label="Seleccionar ${esc(c.id)}"> <button class="chico" data-abrir="${esc(c.id)}" title="Abrir detalle">${esc(c.id)}</button>${flash ? `<span class="editado-por">editado por ${esc(nombreDe(rec.por))}</span>` : ''}</td>
     <td>${esc(c.unidad)}</td><td>${esc(c.programa || '')}</td><td>${esc(c.subtitulo || '')}</td><td>${esc(c.asignacion || '')}</td>
     <td class="detalle-celda">${esc(c.detalle || '')}${c.vinculo ? ' <span class="tag" title="Vinculada a otro origen por OC">🔗</span>' : ''}</td>
@@ -98,6 +99,47 @@ function filaHTML(c, ctx) {
   </tr>`;
 }
 
+const SEMAFOROS = [['rojo', 'Rojo', 'alerta'], ['amarillo', 'Amarillo', 'reloj'], ['verde', 'Verde', 'ok'], ['azul', 'Ejecutada', 'documento'], ['gris', 'Desistida', 'filtro']];
+const VENTANAS = [['vencida', 'Vencida'], ['proxima', 'Por vencer (≤10 días)'], ['ok', 'Con margen'], ['na', 'No aplica']];
+
+/** Compras que pasan todos los filtros salvo `campo` (para contar cada opción de una barra de chips). */
+function sinFiltro(ctx, campo) {
+  const prev = f[campo];
+  f[campo] = '';
+  const out = filtrar(ctx);
+  f[campo] = prev;
+  return out;
+}
+
+/** Interfaz v2: tarjetas de resumen del filtro y chips de semáforo y ventana con sus conteos. */
+function bloqueV2(lista, ctx, tot) {
+  const riesgo = lista.filter((c) => c.enTotales).reduce((s, c) => s + montoEnRiesgo(c), 0);
+  const rojas = lista.filter((c) => c.enTotales && c.s.color === 'rojo').length;
+  const filtro = [f.unidad, f.subdir, f.programa, f.subtitulo, f.fuente, f.etapa ? `etapa ${f.etapa}` : '', f.texto].filter(Boolean).join(' · ') || 'Todas las unidades y fuentes';
+  const k = (tono, ico, etq, val, det) => `<div class="kpi kpi-${tono} tarjeta"><span class="kpi-ico">${icono(ico, 22)}</span><div class="etq">${etq}</div><div class="val">${val}</div><div class="det">${det}</div></div>`;
+  const porSem = sinFiltro(ctx, 'semaforo');
+  const porVen = sinFiltro(ctx, 'ventana');
+  const chip = (campo, v, txt, n, cls, ico) => `<button type="button" class="chip ${cls}${f[campo] === v ? ' activo' : ''}" data-chip="${campo}" data-valor="${esc(v)}">${ico ? icono(ico, 16) : ''}${esc(txt)}<span class="cuenta-chip">${n}</span></button>`;
+  return `<section class="v2-resumen tarjeta no-imprimir">
+    <div class="v2-resumen-info"><span class="tile">${icono('planilla', 24)}</span><div>
+      <h3>Resumen del filtro</h3><div class="grande">${lista.length} compras</div><div class="small muted">${esc(filtro)}</div>
+      <p class="small muted">Totales sin el Seguimiento SEP (solo seguimiento). El monto en riesgo es el PAC pendiente de devengar de las compras en rojo.</p></div></div>
+    <div class="v2-kpis">
+      ${k('azul', 'documento', 'PAC 2026', clp(tot.pac), `${lista.filter((c) => c.enTotales).length} compras en totales`)}
+      ${k('verde', 'ok', 'Adjudicado / OC', clp(tot.adj), `${pct(tot.pac ? tot.adj / tot.pac : NaN)} del PAC`)}
+      ${k('ambar', 'moneda', 'Devengado', clp(tot.real), `${pct(tot.pac ? tot.real / tot.pac : NaN)} de ejecución`)}
+      ${k('rojo', 'alerta', 'En riesgo', clp(riesgo), `${rojas} compras en rojo`)}
+    </div></section>
+  <section class="v2-chips tarjeta no-imprimir">
+    <div class="v2-chips-titulo"><span class="tile">${icono('filtro', 22)}</span><div><div class="sobretitulo">Detalle de compras</div><div class="grande">${lista.length} de ${ctx.calc.length}</div></div></div>
+    <div class="v2-chips-filas">
+      <div class="fila-chips"><span class="etq-chips">Semáforo</span>${chip('semaforo', '', 'Todas', porSem.length, 'todas', 'filtro')}
+        ${SEMAFOROS.map(([v, t, i]) => chip('semaforo', v, t, porSem.filter((c) => c.s.color === v).length, `c-${v}`, i)).join('')}</div>
+      <div class="fila-chips"><span class="etq-chips">Ventana</span>${chip('ventana', '', 'Todas', porVen.length, 'todas', 'calendario')}
+        ${VENTANAS.map(([v, t]) => chip('ventana', v, t, porVen.filter((c) => ventanaEstado(c) === v).length, `v-${v}`, v === 'vencida' ? 'alerta' : v === 'proxima' ? 'reloj' : v === 'ok' ? 'ok' : null)).join('')}</div>
+    </div></section>`;
+}
+
 export function render(el, ctx) {
   const lista = ordenar(filtrar(ctx), CLAVES_ORDEN[orden.k] || CLAVES_ORDEN.id, orden.dir);
   const uniq = (fn) => [...new Set(ctx.calc.map(fn).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), 'es', { numeric: true }));
@@ -107,7 +149,7 @@ export function render(el, ctx) {
   el.innerHTML = `
   <div class="fila no-imprimir" style="margin-bottom:.5rem"><h2 style="margin:0">Planilla en línea</h2><div class="espacio"></div>
     <label class="small"><input type="checkbox" id="pl-12"${doceMeses ? ' checked' : ''}> 12 meses</label>
-    <button id="pl-xlsx" title="Exporta todas las compras que muestra el filtro">Exportar Excel</button><button id="pl-csv" title="Exporta todas las compras que muestra el filtro">Exportar CSV</button></div>
+    <button id="pl-xlsx" data-exportar title="Exporta todas las compras que muestra el filtro">Exportar Excel</button><button id="pl-csv" title="Exporta todas las compras que muestra el filtro">Exportar CSV</button></div>
   <div id="pl-barra-sel" class="barra-sel no-imprimir"></div>
   <div class="filtros">
     <label>Unidad<select data-f="unidad">${opciones(uniq((c) => c.unidad), f.unidad, 'Todas')}</select></label>
@@ -120,8 +162,9 @@ export function render(el, ctx) {
     <label>Semáforo<select data-f="semaforo">${opciones([['rojo', 'Rojo'], ['amarillo', 'Amarillo'], ['verde', 'Verde'], ['azul', 'Ejecutada'], ['gris', 'Desistida']], f.semaforo, 'Todos')}</select></label>
     <label>Ventana<select data-f="ventana">${opciones([['vencida', 'Vencida'], ['proxima', 'Por vencer (≤10 días)'], ['ok', 'Con margen'], ['na', 'No aplica']], f.ventana, 'Todas')}</select></label>
     <label>Buscar<input type="search" data-f="texto" value="${esc(f.texto)}" placeholder="ID, detalle, OC…"></label>
-    <button class="chico" id="pl-limpiar">Limpiar filtros</button>
+    <button class="chico" id="pl-limpiar">${esV2() ? `${icono('limpiar', 16)} Limpiar` : 'Limpiar filtros'}</button>
   </div>
+  ${esV2() ? bloqueV2(lista, ctx, tot) : ''}
   <div class="small muted" style="margin-bottom:.4rem">${lista.length} de ${ctx.calc.length} compras · totales sin SEP (solo seguimiento): PAC ${clp(tot.pac)} · Adjudicado/OC ${clp(tot.adj)} · Devengado ${clp(tot.real)}
     ${estado.rol ? ' · Las celdas amarillas son editables por su rol' : ''}</div>
   <div class="tabla-wrap"><table class="t" id="tabla-planilla"><thead><tr>
@@ -140,6 +183,7 @@ export function render(el, ctx) {
       if (ev === 'input') { clearTimeout(i._t); i._t = setTimeout(() => { render(el, ctx); const n = el.querySelector('[data-f="texto"]'); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); } else render(el, ctx);
     });
   });
+  el.querySelectorAll('[data-chip]').forEach((b) => { b.onclick = () => { f[b.dataset.chip] = b.dataset.valor; render(el, ctx); }; });
   el.querySelector('#pl-limpiar').onclick = () => { Object.keys(f).forEach((k) => { f[k] = ''; }); render(el, ctx); };
   el.querySelector('#pl-12').onchange = (e) => { doceMeses = e.target.checked; render(el, ctx); };
   // ---- selección para exportar
