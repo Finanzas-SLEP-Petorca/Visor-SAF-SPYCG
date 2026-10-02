@@ -1,8 +1,8 @@
 // Calendario y ventanas: línea de tiempo septiembre–diciembre y mapa de calor semanal.
-import { lunesDe, sumarDias } from '../logica/habiles.js';
-import { esc, fecha, clp } from '../formato.js';
-import { activarTooltips } from '../ui.js';
-import { colorCalor, tintaCalor } from './graficos.js';
+import { lunesDe, sumarDias } from '../logica/habiles.js?v=202610022053';
+import { esc, fecha, clp } from '../formato.js?v=202610022053';
+import { activarTooltips } from '../ui.js?v=202610022053';
+import { colorCalor, tintaCalor } from './graficos.js?v=202610022053';
 
 const COLOR = { rojo: 'var(--st-rojo)', amarillo: 'var(--st-amarillo)', verde: 'var(--st-verde)', azul: 'var(--st-azul)', gris: 'var(--st-gris)' };
 const FORMA = { rojo: '▲', amarillo: '◆', verde: '●', azul: '●', gris: '○' };
@@ -14,7 +14,8 @@ export function render(el, ctx) {
   const fin = `${anio}-12-31`;
   const dias = (a, b) => (Date.parse(b) - Date.parse(a)) / 86400000;
   const total = dias(ini, fin);
-  const W = 1000; const ml = 20; const mr = 20;
+  // Ancho del dibujo según la pantalla, para que el texto no se agrande en monitores anchos.
+  const W = Math.max(1000, Math.round((el.clientWidth || 1000) - 80)); const ml = 20; const mr = 20;
   const x = (iso) => ml + (Math.max(0, Math.min(total, dias(ini, iso))) / total) * (W - ml - mr);
   const activas = ctx.calc.filter((c) => c.enTotales && c.v.aplica);
   // Ubicar compras en filas para evitar superposición

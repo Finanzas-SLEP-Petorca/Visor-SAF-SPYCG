@@ -30,6 +30,8 @@ Unidades requirentes ─ editan ─► Planillas Excel en SharePoint (el Visor n
 | Carpeta / archivo | Contenido |
 |---|---|
 | `index.html`, `css/`, `src/app.js`, `src/vistas/` | Interfaz (módulos ES, sin compilación) |
+| `img/` | Logos institucionales (los mismos del panel de Control de DC) |
+| `scripts/marca.mjs` | `npm run marca`: marca de versión `?v=` en index.html y en las importaciones, para que el navegador no mezcle archivos nuevos con otros en caché. Ejecutarla antes de cada commit que cambie la interfaz (`npm test` lo verifica) |
 | `css/visor-v2.css`, `src/iconos.js` | Formato común de los paneles de Finanzas (encabezado con íconos, tarjetas con degradado, chips con conteo). `index-v1.html` conserva la interfaz anterior como respaldo |
 | `src/normalizer.js`, `src/normalizer-sep.js` | Normalizadores puros (navegador, agente y conector) |
 | `src/conciliacion.js`, `src/importacion.js` | Conciliación de IDs y preparación de cada importación |

@@ -1,8 +1,8 @@
 // Piezas de interfaz compartidas por las vistas.
-import { esc, fecha, clp } from './formato.js';
-import { ETAPAS } from './logica/motor.js';
-import { ROLES } from './parametros-default.js';
-import { icono, esV2 } from './iconos.js';
+import { esc, fecha, clp } from './formato.js?v=202610022053';
+import { ETAPAS } from './logica/motor.js?v=202610022053';
+import { ROLES } from './parametros-default.js?v=202610022053';
+import { icono, esV2 } from './iconos.js?v=202610022053';
 
 const SEM = {
   rojo: ['⛔', 'Rojo'], amarillo: ['⚠', 'Amarillo'], verde: ['✓', 'Verde'], azul: ['●', 'Ejecutada'], gris: ['⊘', 'Desistida'],

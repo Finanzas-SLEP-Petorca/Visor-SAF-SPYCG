@@ -1,11 +1,11 @@
 // Exportaciones: Excel (SheetJS desde su CDN oficial), CSV y preparación de impresión a PDF.
 // Todas incluyen fuente, fecha de corte y usuario que exportó.
-import { estado } from '../datos.js';
-import { ETAPAS, repartirPorFuente } from '../logica/motor.js';
-import { MESES } from '../util.js';
-import { ROLES_OBS, ROLES } from '../parametros-default.js';
-import { fecha, fechaHora, esc } from '../formato.js';
-import { descargar } from '../ui.js';
+import { estado } from '../datos.js?v=202610022053';
+import { ETAPAS, repartirPorFuente } from '../logica/motor.js?v=202610022053';
+import { MESES } from '../util.js?v=202610022053';
+import { ROLES_OBS, ROLES } from '../parametros-default.js?v=202610022053';
+import { fecha, fechaHora, esc } from '../formato.js?v=202610022053';
+import { descargar } from '../ui.js?v=202610022053';
 
 const URL_SHEETJS = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs';
 let XLSX = null;

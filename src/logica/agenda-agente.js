@@ -1,6 +1,6 @@
 // Horario del agente local: una revisión diaria los días hábiles a las 12:00 (hora de Santiago).
 // Puro: sin DOM ni Firebase.
-import { esHabil, sumarDias } from './habiles.js';
+import { esHabil, sumarDias } from './habiles.js?v=202610022053';
 
 export const HORA_AGENTE = 12; // 12:00
 export const TOLERANCIA_MIN = 30; // minutos de gracia antes de dar la revisión por atrasada
