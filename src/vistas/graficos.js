@@ -1,6 +1,6 @@
 // Gráficos SVG livianos (sin librerías). Un solo eje Y, líneas de 2px, tooltip por mes,
 // etiquetas directas al final de cada serie, leyenda y tabla alternativa.
-import { esc, clp, clpCorto } from '../formato.js';
+import { esc, clp, clpCorto } from '../formato.js?v=202610022053';
 
 function escala(max) {
   if (max <= 0) return { tope: 1, paso: 1 };
@@ -63,7 +63,7 @@ export function lineas(o) {
 
 /** Barras verticales de una serie. */
 export function barras(o) {
-  const W = 520; const H = o.alto || 220; const ml = 64; const mr = 10; const mt = 16; const mb = 28;
+  const W = o.ancho || 760; const H = o.alto || 240; const ml = 64; const mr = 10; const mt = 16; const mb = 28;
   const max = Math.max(0, ...o.valores);
   const { tope, paso } = escala(max);
   const n = o.valores.length;

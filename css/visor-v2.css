@@ -14,6 +14,7 @@
   --accent-suave: #e8f0fe;
   --accent-ink: #ffffff;
   --navy: #1e3a8a;
+  --logo-fondo: transparent;
   --titulo: #1e40af;
   --radius: 16px;
   --shadow: 0 1px 2px rgba(15, 31, 61, .04), 0 4px 16px rgba(15, 31, 61, .06);
@@ -31,7 +32,7 @@
 @media (prefers-color-scheme: dark) {
   :root.v2:not([data-theme="light"]) {
     --bg: #0b1222; --surface: #121b2e; --surface-2: #17223a; --ink: #eef2f9; --ink-2: #c4cfe2; --muted: #8e9bb4;
-    --line: #223050; --line-2: #2c3b5e; --accent: #5b8def; --accent-suave: #1b2c52; --navy: #3b6fe0; --titulo: #8db2ff;
+    --line: #223050; --line-2: #2c3b5e; --logo-fondo: #ffffff; --accent: #5b8def; --accent-suave: #1b2c52; --navy: #3b6fe0; --titulo: #8db2ff;
     --st-ambar: #f5b84a; --st-ambar-bg: #3a2a0c; --st-ambar-line: #6b4a12;
     --st-rojo-line: #6b2424; --st-verde-line: #1f5a35; --st-azul-line: #24467e; --st-gris-line: #3a4255; --fila-roja: #2a1518;
     --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
@@ -39,7 +40,7 @@
 }
 :root.v2[data-theme="dark"] {
   --bg: #0b1222; --surface: #121b2e; --surface-2: #17223a; --ink: #eef2f9; --ink-2: #c4cfe2; --muted: #8e9bb4;
-  --line: #223050; --line-2: #2c3b5e; --accent: #5b8def; --accent-suave: #1b2c52; --navy: #3b6fe0; --titulo: #8db2ff;
+  --line: #223050; --line-2: #2c3b5e; --logo-fondo: #ffffff; --accent: #5b8def; --accent-suave: #1b2c52; --navy: #3b6fe0; --titulo: #8db2ff;
   --st-ambar: #f5b84a; --st-ambar-bg: #3a2a0c; --st-ambar-line: #6b4a12;
   --st-rojo-line: #6b2424; --st-verde-line: #1f5a35; --st-azul-line: #24467e; --st-gris-line: #3a4255; --fila-roja: #2a1518;
   --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
@@ -51,7 +52,10 @@
 .v2 .ico { flex: none; }
 
 /* ---------- botones y campos ---------- */
-.v2 button, .v2 .btn { border-radius: 10px; padding: .5rem .95rem; font-weight: 600; border-color: var(--line-2); display: inline-flex; align-items: center; gap: .4rem; }
+.v2 button, .v2 .btn { border-radius: 10px; padding: .5rem .95rem; font-weight: 600; border-color: var(--line-2); display: inline-flex; align-items: center; gap: .4rem; white-space: nowrap; }
+.v2 button.tarjeta { display: block; text-align: left; font-weight: inherit; padding: 1.15rem 1.25rem; border-radius: var(--radius); }
+.v2 button.tarjeta:hover { background: var(--surface); border-color: var(--line-2); }
+.v2 button.tarjeta[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-suave), var(--shadow); }
 .v2 button.chico { padding: .3rem .65rem; font-size: 12.5px; border-radius: 8px; }
 .v2 button.primario { background: var(--navy); border-color: var(--navy); }
 .v2 input, .v2 select, .v2 textarea { border-radius: 10px; border-color: var(--line-2); padding: .5rem .7rem; }
@@ -60,9 +64,11 @@
 /* ---------- encabezado ---------- */
 .v2 header.v2-barra { padding: .55rem 1.25rem; gap: 1rem; flex-wrap: nowrap; box-shadow: 0 1px 0 var(--line); border-bottom: none; }
 .v2 .marca-inst { display: flex; align-items: center; gap: .9rem; text-decoration: none; color: var(--ink); flex: none; }
-.v2 .logo-slep { display: grid; line-height: 1; padding: .4rem .55rem; border-radius: 8px; background: linear-gradient(135deg, #1d4ed8, #dc2626); color: #fff; text-align: center; }
-.v2 .logo-slep b { font-size: 13px; letter-spacing: .08em; }
-.v2 .logo-slep span { font-size: 8.5px; letter-spacing: .14em; margin-top: 2px; }
+.v2 .logos { display: flex; align-items: center; gap: .6rem; padding: .25rem .5rem; border-radius: 10px; background: var(--logo-fondo); }
+.v2 .logos img { display: block; height: auto; }
+.v2 .logo-petorca { width: 120px; }
+.v2 .logo-mineduc { width: 44px; border-radius: 3px; }
+.v2 .titulo-app { padding-left: .9rem; border-left: 1px solid var(--line); }
 .v2 .titulo-app { display: grid; line-height: 1.15; }
 .v2 .titulo-app b { font-size: 1.12rem; font-weight: 800; }
 .v2 .titulo-app span { font-size: .95rem; font-weight: 700; }
@@ -103,7 +109,7 @@
 
 /* ---------- tarjetas ---------- */
 .v2 .tarjeta { border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow); padding: 1.15rem 1.25rem; }
-.v2 .grilla { gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.v2 .grilla { gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(215px, 100%), 1fr)); }
 .v2 .grilla.dos { grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); }
 .v2 .kpi { position: relative; overflow: hidden; }
 .v2 .kpi .etq { font-size: 13px; font-weight: 600; color: var(--ink-2); }
@@ -174,7 +180,10 @@
 .v2 .sem.azul { border-color: var(--st-azul-line); }
 .v2 .sem.gris { border-color: var(--st-gris-line); }
 .v2 .tag { border-radius: 6px; padding: .1rem .45rem; font-weight: 600; white-space: nowrap; }
-.v2 .marca { border-radius: 6px; }
+.v2 .marca { border-radius: 6px; white-space: nowrap; display: inline-block; }
+.v2 .etapa { display: inline; }
+.v2 label.campo + h4, .v2 .form-grid + h4 { margin-top: 1rem; }
+.v2 h4 { font-size: .95rem; font-weight: 750; color: var(--ink); margin: 1rem 0 .5rem; }
 .v2 .pill { padding: .2rem .6rem; font-weight: 600; }
 .v2 .subpestanas button { border-radius: 10px; }
 .v2 .subpestanas button[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); }
@@ -214,7 +223,9 @@
 
 @media (max-width: 640px) {
   .v2 header.v2-barra { padding: .5rem .75rem; gap: .5rem; }
-  .v2 .titulo-app small, .v2 .selector-tema, .v2 .insignia { display: none; }
+  .v2 .titulo-app small, .v2 .selector-tema, .v2 .insignia, .v2 .logo-mineduc { display: none; }
+  .v2 .titulo-app { border-left: none; padding-left: 0; }
+  .v2 .logo-petorca { width: 96px; }
   .v2 main, .v2 .guia-wrap, .v2 .estado-linea { padding-left: .75rem; padding-right: .75rem; }
   .v2 .v2-chips { flex-direction: column; align-items: stretch; }
   .v2 .v2-chips-titulo { border-right: none; padding-right: 0; min-width: 0; }

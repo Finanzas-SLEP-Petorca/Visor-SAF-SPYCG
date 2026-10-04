@@ -1,6 +1,6 @@
 // Campos de visor_gestion que cada rol puede escribir. DEBE coincidir con vCamposRol() de
 // firestore.rules (la prueba test/roles.test.mjs lo verifica cuando las reglas están disponibles).
-import { MODALIDADES, ESTADOS_PROCESO, ESTADOS_GENERALES } from './parametros-default.js';
+import { MODALIDADES, ESTADOS_PROCESO, ESTADOS_GENERALES } from './parametros-default.js?v=202610022053';
 
 export const CAMPOS_DIRECCION = [
   'direccion_estadoGeneral', 'direccion_fuentes', 'direccion_fechaEstimadaRequerimiento', 'direccion_prioridad',
