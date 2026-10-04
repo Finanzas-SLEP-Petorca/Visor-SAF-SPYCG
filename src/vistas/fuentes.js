@@ -1,9 +1,9 @@
 // Vista por subvención o fuente, con pestaña SEP (formato del Seguimiento SEP y vínculos).
-import { estado, guardarParametros } from '../datos.js?v=202610022053';
-import { agregar, repartirPorFuente, calcularVinculos, ETAPAS } from '../logica/motor.js?v=202610022053';
-import { similitud } from '../util.js?v=202610022053';
-import { esc, clp, pct } from '../formato.js?v=202610022053';
-import { semaforo, etapa, toast, fuenteCifra } from '../ui.js?v=202610022053';
+import { estado, guardarParametros } from '../datos.js?v=202610041525';
+import { agregar, repartirPorFuente, calcularVinculos, ETAPAS } from '../logica/motor.js?v=202610041525';
+import { similitud } from '../util.js?v=202610041525';
+import { esc, clp, pct } from '../formato.js?v=202610041525';
+import { semaforo, etapa, toast, fuenteCifra } from '../ui.js?v=202610041525';
 
 let pestana = 'fuentes';
 let fuenteSel = null;
@@ -25,9 +25,10 @@ function renderFuentes(el, ctx) {
   const compras = sel ? ctx.calc.filter((c) => c.enTotales && sel in repartirPorFuente(c, 1)) : [];
   el.innerHTML = `<h2>Por subvención o fuente</h2>
   <p class="small muted">La fuente la registran las Subdirecciones en cada compra; un contrato con varias fuentes se reparte según los montos indicados. Mientras no la definan, se usan los montos por fuente de la planilla de la unidad (columnas MONTO SUBV …); si tampoco la trae, queda en "Sin clasificar".</p>
-  <div class="grilla">${grupos.map((g) => `<button class="tarjeta kpi" style="text-align:left" data-fuente="${esc(g.clave)}" aria-pressed="${g.clave === sel}">
-    <div class="etq">${esc(g.clave)} · ${Math.round(g.n)} compras</div><div class="val">${clp(g.pac)}</div>
-    <div class="det">Adjudicado ${clp(g.adjudicado)} · Devengado ${clp(g.real)}<br>Proyectado (probable) ${clp(g.probable)} · En riesgo ${clp(g.riesgo)}${g.condicionado ? `<br>Condicionado ${clp(g.condicionado)}` : ''}</div></button>`).join('')}</div>
+  <div class="grilla grilla-fuentes">${grupos.map((g) => `<button class="tarjeta kpi" style="text-align:left" data-fuente="${esc(g.clave)}" aria-pressed="${g.clave === sel}">
+    <div class="etq">${esc(g.clave)} · ${g.compras} ${g.compras === 1 ? 'compra' : 'compras'}</div><div class="val">${clp(g.pac)}</div>
+    <dl class="det cifras-fuente"><dt>Adjudicado</dt><dd>${clp(g.adjudicado)}</dd><dt>Devengado</dt><dd>${clp(g.real)}</dd>
+      <dt>Proyectado (probable)</dt><dd>${clp(g.probable)}</dd><dt>En riesgo</dt><dd>${clp(g.riesgo)}</dd>${g.condicionado ? `<dt>Condicionado</dt><dd>${clp(g.condicionado)}</dd>` : ''}</dl></button>`).join('')}</div>
   ${fuenteCifra(ctx)}
   ${sel ? `<div class="tarjeta" style="margin-top:1rem"><h3>${esc(sel)}: ${compras.length} compras</h3><div class="tabla-wrap"><table class="t"><thead><tr><th>ID</th><th>Unidad</th><th>Detalle</th><th class="num">Parte de la fuente</th><th class="num">PAC</th><th class="num">Devengado</th><th>Etapa</th><th>Semáforo</th></tr></thead><tbody>
     ${compras.map((c) => { const w = repartirPorFuente(c, 1)[sel]; return `<tr><td><button class="chico" data-abrir="${esc(c.id)}">${esc(c.id)}</button></td><td>${esc(c.unidad)}</td><td>${esc(c.detalle)}</td><td class="num">${pct(w)}</td><td class="num">${clp(c.m.pac * w)}</td><td class="num">${clp(c.m.real * w)}</td><td>${etapa(c.et)}</td><td>${semaforo(c.s.color)}</td></tr>`; }).join('')}

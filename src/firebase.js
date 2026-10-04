@@ -6,7 +6,7 @@ import {
 import {
   initializeFirestore, persistentLocalCache, persistentMultipleTabManager, connectFirestoreEmulator,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { firebaseConfig as configBase } from './firebase-config.js?v=202610022053';
+import { firebaseConfig as configBase } from './firebase-config.js?v=202610041525';
 
 const firebaseConfig = { ...configBase };
 
