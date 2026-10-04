@@ -148,6 +148,9 @@ main { padding: 1rem; max-width: 100%; }
 .kpi .etq { font-size: 12px; color: var(--muted); }
 .kpi .val { font-size: 1.45rem; font-weight: 650; margin-top: .15rem; }
 .kpi .det { font-size: 12px; color: var(--ink-2); margin-top: .2rem; }
+.cifras-fuente { display: grid; grid-template-columns: auto 1fr; gap: .1rem .75rem; margin: .5rem 0 0; }
+.cifras-fuente dt { color: var(--muted); }
+.cifras-fuente dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
 .fuente-cifra { font-size: 11px; color: var(--muted); margin-top: .5rem; }
 .supuestos { font-size: 12px; color: var(--ink-2); background: var(--surface-2); border-radius: 8px; padding: .5rem .75rem; }
 .supuestos summary { cursor: pointer; font-weight: 600; }

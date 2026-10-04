@@ -1,9 +1,9 @@
 // Parámetros: fechas, duraciones, factores, UTM, feriados, listas, ventanas, mapa unidad → Subdirección,
 // usuarios y roles, y respaldo. Cada sección se edita solo con el rol que las reglas permiten.
-import { estado, guardarParametros, guardarRoles, leerObservaciones } from '../datos.js?v=202610022053';
-import { MODALIDADES, ROLES } from '../parametros-default.js?v=202610022053';
-import { esc, fecha } from '../formato.js?v=202610022053';
-import { opciones, toast, descargar } from '../ui.js?v=202610022053';
+import { estado, guardarParametros, guardarRoles, leerObservaciones } from '../datos.js?v=202610041525';
+import { MODALIDADES, ROLES } from '../parametros-default.js?v=202610041525';
+import { esc, fecha } from '../formato.js?v=202610041525';
+import { opciones, toast, descargar } from '../ui.js?v=202610041525';
 
 const MESES_N = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 const SIT = { ejecucion: 'Etapa 3–4 o etapa 2 con OC', adjudicadaSinOC: 'Etapa 2 adjudicada sin OC', publicada: 'Etapa 1 publicada / en evaluación, en ventana',

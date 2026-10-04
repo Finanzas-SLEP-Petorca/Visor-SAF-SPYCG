@@ -1,10 +1,10 @@
 // Motor de negocio (sección 7): unifica compras, etapa, ventana, semáforo, proyección,
 // alertas y acciones. Puro: sin DOM ni Firebase.
 
-import { MESES, normTxt, suma } from '../util.js?v=202610022053';
-import { categoriaTipo } from '../normalizer.js?v=202610022053';
-import { MODALIDADES } from '../parametros-default.js?v=202610022053';
-import { restarHabiles, contarHabiles, finDeMes, lunesDe, hoyISO } from './habiles.js?v=202610022053';
+import { MESES, normTxt, suma } from '../util.js?v=202610041525';
+import { categoriaTipo } from '../normalizer.js?v=202610041525';
+import { MODALIDADES } from '../parametros-default.js?v=202610041525';
+import { restarHabiles, contarHabiles, finDeMes, lunesDe, hoyISO } from './habiles.js?v=202610041525';
 
 export const ETAPAS = {
   0: 'Planificada',
@@ -387,9 +387,10 @@ export function agregar(calc, clave) {
     const reparto = ks ? Object.fromEntries(ks.map((k) => [k, 1])) : null;
     const partes = reparto || Object.fromEntries(Object.entries(repartirPorFuente(c, 1)));
     for (const [k, w] of Object.entries(partes)) {
-      if (!grupos.has(k)) grupos.set(k, { clave: k, n: 0, pac: 0, adjudicado: 0, real: 0, conservador: 0, probable: 0, planificado: 0, riesgo: 0, condicionado: 0 });
+      if (!grupos.has(k)) grupos.set(k, { clave: k, n: 0, compras: 0, pac: 0, adjudicado: 0, real: 0, conservador: 0, probable: 0, planificado: 0, riesgo: 0, condicionado: 0 });
       const gg = grupos.get(k);
       gg.n += w;
+      if (w > 0) gg.compras += 1; // compras con alguna parte en este grupo (n suma solo la proporción)
       gg.pac += c.m.pac * w;
       gg.adjudicado += c.m.adjudicado * w;
       gg.real += c.m.real * w;

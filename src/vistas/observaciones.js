@@ -1,8 +1,8 @@
 // Observaciones separadas por rol, filtrables por fecha, unidad y compra.
-import { leerObservaciones } from '../datos.js?v=202610022053';
-import { ROLES_OBS, ROLES } from '../parametros-default.js?v=202610022053';
-import { esc, fechaHora, aDate } from '../formato.js?v=202610022053';
-import { opciones, toast } from '../ui.js?v=202610022053';
+import { leerObservaciones } from '../datos.js?v=202610041525';
+import { ROLES_OBS, ROLES } from '../parametros-default.js?v=202610041525';
+import { esc, fechaHora, aDate } from '../formato.js?v=202610041525';
+import { opciones, toast } from '../ui.js?v=202610041525';
 
 let cache = null;
 let cargando = false;

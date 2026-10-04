@@ -3,7 +3,7 @@
 // ya leído (objeto de SheetJS: { SheetNames, Sheets }) y el nombre del archivo.
 // Lo reutilizan el navegador, el agente local y el conector en la nube.
 
-import { MESES, MESES_LARGOS, normTxt, esVacio, parseMonto, slugUnidad, pad3 } from './util.js?v=202610022053';
+import { MESES, MESES_LARGOS, normTxt, esVacio, parseMonto, slugUnidad, pad3 } from './util.js?v=202610041525';
 
 export const VERSION_NORMALIZADOR = 2;
 
