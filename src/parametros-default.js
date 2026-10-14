@@ -5,6 +5,7 @@
 export const MODALIDADES = [
   { key: 'compraAgil', nombre: 'Compra ágil' },
   { key: 'convenioMarco', nombre: 'Convenio marco (hasta 1.000 UTM)' },
+  { key: 'convenioMarcoCotizacion', nombre: 'Convenio marco con cotización (hasta 1.000 UTM)' },
   { key: 'convenioMarcoGrande', nombre: 'Convenio marco, gran compra (más de 1.000 UTM)' },
   { key: 'tratoDirecto', nombre: 'Trato directo' },
   { key: 'licitacionL1', nombre: 'Licitación menor a 100 UTM' },
@@ -51,6 +52,7 @@ export const PARAMETROS_DEFECTO = {
   duraciones: {
     compraAgil: { dias: 10, entrega: 15, limiteUTM: 100 },
     convenioMarco: { dias: 7, entrega: 15 },
+    convenioMarcoCotizacion: { dias: 15, entrega: 15 },
     convenioMarcoGrande: { dias: 30, entrega: 15 },
     tratoDirecto: { dias: 20, entrega: 15 },
     licitacionL1: { dias: 20, entrega: 15 },

@@ -1,9 +1,9 @@
 // Vista por subvención o fuente, con pestaña SEP (formato del Seguimiento SEP y vínculos).
-import { estado, guardarParametros } from '../datos.js?v=202610041525';
-import { agregar, repartirPorFuente, calcularVinculos, ETAPAS } from '../logica/motor.js?v=202610041525';
-import { similitud } from '../util.js?v=202610041525';
-import { esc, clp, pct } from '../formato.js?v=202610041525';
-import { semaforo, etapa, toast, fuenteCifra } from '../ui.js?v=202610041525';
+import { estado, guardarParametros } from '../datos.js?v=202610141543';
+import { agregar, repartirPorFuente, calcularVinculos, ETAPAS } from '../logica/motor.js?v=202610141543';
+import { similitud } from '../util.js?v=202610141543';
+import { esc, clp, pct } from '../formato.js?v=202610141543';
+import { semaforo, etapa, toast, fuenteCifra } from '../ui.js?v=202610141543';
 
 let pestana = 'fuentes';
 let fuenteSel = null;

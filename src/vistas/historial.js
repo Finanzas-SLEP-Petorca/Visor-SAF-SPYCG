@@ -1,7 +1,7 @@
 // Historial completo de cambios (quién, qué, cuándo, antes y después).
-import { leerHistorial } from '../datos.js?v=202610041525';
-import { esc, fechaHora } from '../formato.js?v=202610041525';
-import { opciones, toast } from '../ui.js?v=202610041525';
+import { leerHistorial } from '../datos.js?v=202610141543';
+import { esc, fechaHora } from '../formato.js?v=202610141543';
+import { opciones, toast } from '../ui.js?v=202610141543';
 
 let cache = null;
 let cargando = false;

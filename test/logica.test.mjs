@@ -249,3 +249,23 @@ test('montos por fuente de la planilla: reparto proporcional', () => {
   assert.equal(origenFuente(r[0]), 'planilla');
   assert.deepEqual(repartirPorFuente(r[0], 100), { SEP: 75, PIE: 25 });
 });
+
+test('modalidad convenio marco con cotización (hasta 1.000 UTM)', () => {
+  const b = { X: base([
+    { id: 'X-001', montoPAC: 70000 * 500, tipoCompra: 'CONVENIO MARCO CON COTIZACIÓN' },
+    { id: 'X-002', montoPAC: 70000 * 500, tipoCompra: 'CONVENIO MARCO' },
+    { id: 'X-003', montoPAC: 70000 * 2000, tipoCompra: 'CONVENIO MARCO CON COTIZACIÓN' }, // sobre 1.000 UTM: gran compra
+    { id: 'X-004', montoPAC: 70000 * 500, tipoCompra: 'CONVENIO MARCO' },
+  ]) };
+  const g = { 'X-004': { compras_modalidad: 'convenioMarcoCotizacion' } }; // declarada por Compras
+  const r = porId(calc(b, g));
+  assert.equal(r['X-001'].v.modalidad, 'convenioMarcoCotizacion');
+  assert.equal(r['X-001'].v.modalidadNombre, 'Convenio marco con cotización (hasta 1.000 UTM)');
+  assert.equal(r['X-002'].v.modalidad, 'convenioMarco');
+  assert.equal(r['X-003'].v.modalidad, 'convenioMarcoGrande');
+  assert.equal(r['X-004'].v.modalidad, 'convenioMarcoCotizacion');
+  // Parámetros guardados antes de esta modalidad: toma la duración por defecto
+  const p = mezclarParametros({ duraciones: { convenioMarco: { dias: 8, entrega: 15 } } });
+  assert.equal(p.duraciones.convenioMarcoCotizacion.dias, 15);
+  assert.equal(p.duraciones.convenioMarco.dias, 8);
+});

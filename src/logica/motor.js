@@ -1,10 +1,10 @@
 // Motor de negocio (sección 7): unifica compras, etapa, ventana, semáforo, proyección,
 // alertas y acciones. Puro: sin DOM ni Firebase.
 
-import { MESES, normTxt, suma } from '../util.js?v=202610041525';
-import { categoriaTipo } from '../normalizer.js?v=202610041525';
-import { MODALIDADES } from '../parametros-default.js?v=202610041525';
-import { restarHabiles, contarHabiles, finDeMes, lunesDe, hoyISO } from './habiles.js?v=202610041525';
+import { MESES, normTxt, suma } from '../util.js?v=202610141543';
+import { categoriaTipo } from '../normalizer.js?v=202610141543';
+import { MODALIDADES } from '../parametros-default.js?v=202610141543';
+import { restarHabiles, contarHabiles, finDeMes, lunesDe, hoyISO } from './habiles.js?v=202610141543';
 
 export const ETAPAS = {
   0: 'Planificada',
@@ -201,9 +201,12 @@ export function modalidadCompra(c, montoUTM, p) {
   if (cat === 'TD') return { key: 'tratoDirecto', supuestos };
   if (montoUTM === null) {
     supuestos.push('Sin valor UTM: se asume el tramo de 100 a 1.000 UTM');
-    return { key: cat === 'CM' ? 'convenioMarco' : 'licitacionLE', supuestos };
+    return { key: cat === 'CM' ? (/COTIZ/.test(normTxt(c.tipoTexto)) ? 'convenioMarcoCotizacion' : 'convenioMarco') : 'licitacionLE', supuestos };
   }
-  if (cat === 'CM') return { key: montoUTM > 1000 ? 'convenioMarcoGrande' : 'convenioMarco', supuestos };
+  if (cat === 'CM') {
+    if (montoUTM > 1000) return { key: 'convenioMarcoGrande', supuestos };
+    return { key: /COTIZ/.test(normTxt(c.tipoTexto)) ? 'convenioMarcoCotizacion' : 'convenioMarco', supuestos };
+  }
   const key = montoUTM < 100 ? 'licitacionL1' : montoUTM <= 1000 ? 'licitacionLE' : montoUTM <= 5000 ? 'licitacionLP' : 'licitacionLR';
   return { key, supuestos };
 }
