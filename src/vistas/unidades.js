@@ -1,8 +1,8 @@
 // Vista por unidad requirente y Subdirección: avance, alertas, acciones y compromisos.
-import { agregar, estadoPAC, accionesPorSubdireccion } from '../logica/motor.js?v=202610041525';
-import { esc, clp, pct, fecha } from '../formato.js?v=202610041525';
-import { semaforo, fuenteCifra } from '../ui.js?v=202610041525';
-import { encabezadoImpresion } from './exportar.js?v=202610041525';
+import { agregar, estadoPAC, accionesPorSubdireccion } from '../logica/motor.js?v=202610141543';
+import { esc, clp, pct, fecha } from '../formato.js?v=202610141543';
+import { semaforo, fuenteCifra } from '../ui.js?v=202610141543';
+import { encabezadoImpresion } from './exportar.js?v=202610141543';
 
 let unidadImprimir = null;
 

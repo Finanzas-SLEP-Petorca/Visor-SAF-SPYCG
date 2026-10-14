@@ -4,9 +4,9 @@ import {
   doc, collection, onSnapshot, getDoc, getDocs, query, where, orderBy, limit,
   writeBatch, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { db } from './firebase.js?v=202610041525';
-import { mezclarParametros } from './parametros-default.js?v=202610041525';
-import { MARCA_AGENTE, esDocTecnico } from './datos-comunes.js?v=202610041525';
+import { db } from './firebase.js?v=202610141543';
+import { mezclarParametros } from './parametros-default.js?v=202610141543';
+import { MARCA_AGENTE, esDocTecnico } from './datos-comunes.js?v=202610141543';
 
 export const estado = {
   user: null,
