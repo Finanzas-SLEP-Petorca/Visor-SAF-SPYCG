@@ -1,11 +1,11 @@
 // Resumen ejecutivo (portada).
-import { MESES } from '../util.js?v=202610141543';
-import { agregar, estadoPAC, montoEnRiesgo, ETAPAS } from '../logica/motor.js?v=202610141543';
-import { contarHabiles } from '../logica/habiles.js?v=202610141543';
-import { esc, clp, clpCorto, pct, fecha } from '../formato.js?v=202610141543';
-import { kpi, semaforo, fuenteCifra, activarTooltips } from '../ui.js?v=202610141543';
-import { lineas, barras } from './graficos.js?v=202610141543';
-import { encabezadoImpresion } from './exportar.js?v=202610141543';
+import { MESES } from '../util.js?v=202610231809';
+import { agregar, estadoPAC, montoEnRiesgo, ETAPAS } from '../logica/motor.js?v=202610231809';
+import { contarHabiles } from '../logica/habiles.js?v=202610231809';
+import { esc, clp, clpCorto, pct, fecha } from '../formato.js?v=202610231809';
+import { kpi, semaforo, fuenteCifra, activarTooltips } from '../ui.js?v=202610231809';
+import { lineas, barras } from './graficos.js?v=202610231809';
+import { encabezadoImpresion } from './exportar.js?v=202610231809';
 
 export function render(el, ctx) {
   const { calc, p } = ctx;

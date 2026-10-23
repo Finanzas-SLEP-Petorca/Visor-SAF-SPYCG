@@ -1,8 +1,8 @@
 // Preparación de una importación (navegador o agente local): normaliza cada libro, lo concilia
 // contra visor_base y arma el documento y las entradas de historial. Sin DOM ni Firebase.
-import { normalizarPlanilla, PATRON_ARCHIVO_UNIDAD, VERSION_NORMALIZADOR } from './normalizer.js?v=202610141543';
-import { normalizarSEP, PATRON_ARCHIVO_SEP } from './normalizer-sep.js?v=202610141543';
-import { conciliar, entradasHistorial } from './conciliacion.js?v=202610141543';
+import { normalizarPlanilla, PATRON_ARCHIVO_UNIDAD, VERSION_NORMALIZADOR } from './normalizer.js?v=202610231809';
+import { normalizarSEP, PATRON_ARCHIVO_SEP } from './normalizer-sep.js?v=202610231809';
+import { conciliar, entradasHistorial } from './conciliacion.js?v=202610231809';
 
 export function clasificarArchivo(nombre) {
   const base = String(nombre).split(/[\\/]/).pop();

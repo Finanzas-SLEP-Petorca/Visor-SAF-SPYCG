@@ -1,13 +1,13 @@
 // Conciliación de una importación contra lo ya guardado en visor_base (regla 10).
 // Puro: sin DOM ni Firebase.
 
-import { similitud } from './util.js?v=202610141543';
+import { similitud } from './util.js?v=202610231809';
 
 /** Campos que se comparan para registrar cambios en el historial. */
 export const CAMPOS_COMPARADOS = [
   'programa', 'subtitulo', 'asignacion', 'adminContrato', 'detalle', 'temporalidad',
   'montoPAC', 'montoOC', 'ocs', 'tipoCompra', 'valorOT', 'avanceOT', 'valorRecepcion',
-  'devengadoPlanilla', 'pendienteOT', 'estadoUnidad', 'desglose', 'totalDesglose', 'obsUnidad', 'subvencion', 'montosFuente', 'cdp', 'linea',
+  'devengadoPlanilla', 'pendienteOT', 'estadoUnidad', 'desglose', 'totalDesglose', 'obsUnidad', 'subvencion', 'montosFuente', 'cdp', 'linea', 'tipoEstablecimiento',
   // SEP
   'item', 'montoPresupuestado', 'modalidad', 'idMercadoPublico', 'estadoCompra', 'documentoFormaliza',
   'montoAdjudicado', 'estadoEjecucion', 'verificadores', 'visacionUATP', 'montoDevengado', 'montoPagado', 'observaciones',

@@ -1,12 +1,12 @@
 // Diálogo de detalle de una compra: datos de la planilla, cálculos, gestión por rol,
 // observaciones, contactos con proveedores e historial.
-import { estado, guardarGestion, agregarObservacion, agregarContacto, escucharDetalle } from '../datos.js?v=202610141543';
-import { CAMPOS_ROL, FORMULARIOS, esEditor } from '../roles.js?v=202610141543';
-import { ROLES_OBS, ROLES } from '../parametros-default.js?v=202610141543';
-import { MESES } from '../util.js?v=202610141543';
-import { esc, clp, fecha, fechaHora, pct } from '../formato.js?v=202610141543';
-import { semaforo, etapa, opciones, toast, nombreRol } from '../ui.js?v=202610141543';
-import { exportarCompraExcel, imprimirCompra } from './exportar.js?v=202610141543';
+import { estado, guardarGestion, agregarObservacion, agregarContacto, escucharDetalle } from '../datos.js?v=202610231809';
+import { CAMPOS_ROL, FORMULARIOS, esEditor } from '../roles.js?v=202610231809';
+import { ROLES_OBS, ROLES } from '../parametros-default.js?v=202610231809';
+import { MESES } from '../util.js?v=202610231809';
+import { esc, clp, fecha, fechaHora, pct } from '../formato.js?v=202610231809';
+import { semaforo, etapa, opciones, toast, nombreRol } from '../ui.js?v=202610231809';
+import { exportarCompraExcel, imprimirCompra } from './exportar.js?v=202610231809';
 
 const dlg = () => document.getElementById('detalle');
 let abierto = null; // { id, desuscribir, extra }
@@ -199,6 +199,7 @@ function pintar(ctx, conservarScroll = false) {
       <div class="form-grid small">${[['Administrador contrato', b.adminContrato], ['Temporalidad', b.temporalidad], ['Tipo de compra', b.tipoCompra || 'Sin definir'],
         ['Montos por fuente', b.montosFuente ? Object.entries(b.montosFuente).map(([f, v]) => `${f}: ${clp(v)}`).join(' · ') || 'Sin montos' : (b.subvencion || 'Columnas no presentes')],
         ['CDP (planilla)', b.cdp], ['Línea', b.linea],
+        ...('tipoEstablecimiento' in b ? [['Tipo de establecimiento', b.tipoEstablecimiento]] : []),
         ['Tipo inferido de la OC', b.tipoCompraInferido], ['N° OC', b.ocNoAplica ? 'NO APLICA' : (b.ocs || []).join(', ') || '—'], ['ID cotización', b.idMercadoPublico], ['Valor OT', clp(b.valorOT)],
         ['% avance OT', pct(b.avanceOT)], ['Recepción conforme', clp(b.valorRecepcion)], ['Facturado = devengado', clp(b.devengadoPlanilla)],
         ['Pendiente OT', clp(b.pendienteOT)], ['Total desglose', clp(b.totalDesglose)], ['Fila en la planilla', b.fila]]
