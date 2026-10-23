@@ -47,7 +47,7 @@ try {
       console.log(`\n=== ${ascii(n)}  (SEGUIMIENTO SEP: hoja "${ascii(d.hoja)}", encabezados en la fila ${d.filaExcel})`);
       console.log(`  Hojas del libro: ${d.hojas.map((h) => `"${ascii(h)}"`).join(', ')}`);
       if (!d.hallada) console.log('  ATENCION: no hay una fila con "ITEM" y "PRESUPUESTADO"; se muestra la mas parecida.');
-      for (const c of d.columnas) if (c.encabezado) linea(c, c.campo || '(no se usa)');
+      for (const c of d.columnas) if (c.encabezado) linea(c, c.campo || (c.repetidoDe ? `(no se usa: ${c.campoRepetido} ya se lee de ${c.repetidoDe})` : '(no se usa)'));
       const vistos = new Set(d.columnas.map((c) => c.campo));
       const faltan = ESPERADOS_SEP.filter((k) => !vistos.has(k));
       console.log(`  ${faltan.length ? `Sin columna: ${faltan.join(', ')}` : 'Todas las columnas esperadas estan presentes'}${vistos.has('visacionUATP') ? ' | visacion UATP: SI' : ''}`);

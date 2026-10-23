@@ -1,13 +1,13 @@
 // Planilla en línea: una fila por compra, filtros, edición en la celda para el rol conectado.
-import { estado, guardarGestion } from '../datos.js?v=202610231809';
-import { puedeEscribir } from '../roles.js?v=202610231809';
-import { ESTADOS_PROCESO, ESTADOS_GENERALES, MODALIDADES, ROLES_OBS, ROLES } from '../parametros-default.js?v=202610231809';
-import { ETAPAS, repartirPorFuente, origenFuente, montoEnRiesgo } from '../logica/motor.js?v=202610231809';
-import { MESES } from '../util.js?v=202610231809';
-import { esc, clp, fecha, fechaDe, pct } from '../formato.js?v=202610231809';
-import { semaforo, etapa, opciones, toast, ordenar, activarTooltips, fuenteCifra, activarScrollSuperior } from '../ui.js?v=202610231809';
-import { exportarExcel, exportarCSV } from './exportar.js?v=202610231809';
-import { icono, esV2 } from '../iconos.js?v=202610231809';
+import { estado, guardarGestion } from '../datos.js?v=202610231813';
+import { puedeEscribir } from '../roles.js?v=202610231813';
+import { ESTADOS_PROCESO, ESTADOS_GENERALES, MODALIDADES, ROLES_OBS, ROLES } from '../parametros-default.js?v=202610231813';
+import { ETAPAS, repartirPorFuente, origenFuente, montoEnRiesgo } from '../logica/motor.js?v=202610231813';
+import { MESES } from '../util.js?v=202610231813';
+import { esc, clp, fecha, fechaDe, pct } from '../formato.js?v=202610231813';
+import { semaforo, etapa, opciones, toast, ordenar, activarTooltips, fuenteCifra, activarScrollSuperior } from '../ui.js?v=202610231813';
+import { exportarExcel, exportarCSV } from './exportar.js?v=202610231813';
+import { icono, esV2 } from '../iconos.js?v=202610231813';
 
 const f = {
   unidad: '', subdir: '', programa: '', subtitulo: '', fuente: '', modalidad: '', etapa: '', semaforo: '', ventana: '', texto: '',

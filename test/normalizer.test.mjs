@@ -4,8 +4,8 @@ import {
   normalizarPlanilla, unidadDesdeArchivo, resolverSubtituloAsignacion, extraerOCs,
   normalizarTipoCompra, inferirEstado, separarSeguimientos, normalizarPrograma,
 } from '../src/normalizer.js';
-import { normalizarSEP, detectarVinculos } from '../src/normalizer-sep.js';
-import { libroUnidad, fila, libroSEP, ENCABEZADOS_UNIDAD } from './fixtures/generar.mjs';
+import { normalizarSEP, detectarVinculos, diagnosticarEncabezadosSEP } from '../src/normalizer-sep.js';
+import { libroUnidad, fila, libroSEP, ENCABEZADOS_UNIDAD, ENCABEZADOS_SEP } from './fixtures/generar.mjs';
 
 const M = (vals) => { const a = new Array(12).fill(0); Object.entries(vals).forEach(([i, v]) => { a[i] = v; }); return a; };
 const cuenta = (r, codigo) => r.advertencias.filter((a) => a.codigo === codigo).length;
@@ -266,4 +266,26 @@ test('columnas nuevas: MONTO JUNJI y TIPO DE ESTABLECIMIENTO (planilla de INFRAE
   // Sin la columna, el campo no aparece (no cambia las otras planillas)
   const sin = normalizarPlanilla(libroUnidad('DIEZ', [fila({ nro: 1 })]), 'ESTATUS DEVENGOS COMPRAS DIEZ 2026.xlsx');
   assert.ok(!('tipoEstablecimiento' in sin.filas[0]));
+});
+
+test('SEP: títulos de columnas calculadas que nombran montos no reemplazan a los montos', () => {
+  const enc = [...ENCABEZADOS_SEP];
+  enc[14] = 'Saldo presupuestario (presup. − adjudicado)';
+  enc[15] = 'Por pagar (devengado − pagado)';
+  enc[16] = '% ejecución (pagado / presup.)';
+  const libro = libroSEP([{ item: 'Ítem ficticio', monto: 100, adjudicado: 80, devengado: 50, pagado: 30, estadoCompra: 'Adjudicada' }],
+    { encabezados: enc, calculadas: [999, 888, 0.777] });
+  const r = normalizarSEP(libro, 'Seguimiento_Gastos_SEP.xlsx');
+  assert.equal(r.items[0].montoAdjudicado, 80);
+  assert.equal(r.items[0].montoDevengado, 50);
+  assert.equal(r.items[0].montoPagado, 30);
+  const d = diagnosticarEncabezadosSEP(libro);
+  const campo = Object.fromEntries(d.columnas.map((c) => [c.letra, c.campo]));
+  assert.equal(campo.J, 'montoAdjudicado');
+  assert.equal(campo.O, 'saldo');
+  assert.equal(campo.P, 'porPagar');
+  assert.equal(campo.Q, 'porcentajeEjecucion');
+  assert.deepEqual(d.hojas, ['Resumen', 'Seguimiento SEP', 'Listas']);
+  assert.equal(d.hoja, 'Seguimiento SEP');
+  assert.ok(d.hallada);
 });

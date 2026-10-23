@@ -1,7 +1,7 @@
 // Conciliación de una importación contra lo ya guardado en visor_base (regla 10).
 // Puro: sin DOM ni Firebase.
 
-import { similitud } from './util.js?v=202610231809';
+import { similitud } from './util.js?v=202610231813';
 
 /** Campos que se comparan para registrar cambios en el historial. */
 export const CAMPOS_COMPARADOS = [

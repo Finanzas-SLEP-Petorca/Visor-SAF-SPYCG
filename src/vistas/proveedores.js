@@ -1,6 +1,6 @@
 // Bitácora de contactos con proveedores y compras desiertas sin contacto registrado.
-import { esc, fecha } from '../formato.js?v=202610231809';
-import { nombreRol, semaforo } from '../ui.js?v=202610231809';
+import { esc, fecha } from '../formato.js?v=202610231813';
+import { nombreRol, semaforo } from '../ui.js?v=202610231813';
 
 export function render(el, ctx) {
   const nombreDe = (em) => ctx.estado.rolesDoc?.usuarios?.[em]?.nombre || em;
