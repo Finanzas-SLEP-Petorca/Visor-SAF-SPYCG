@@ -1,10 +1,10 @@
 // Calidad de datos y sincronización: estado de cada planilla e importación desde el navegador.
-import { estado, escribirImportacion } from '../datos.js?v=202610141543';
-import { prepararArchivo, clasificarArchivo } from '../importacion.js?v=202610141543';
-import { cargarSheetJS } from './exportar.js?v=202610141543';
-import { esc, fechaHora, clp, aDate, hace } from '../formato.js?v=202610141543';
-import { toast } from '../ui.js?v=202610141543';
-import { agenteAlDia, HORA_AGENTE } from '../logica/agenda-agente.js?v=202610141543';
+import { estado, escribirImportacion } from '../datos.js?v=202610231806';
+import { prepararArchivo, clasificarArchivo } from '../importacion.js?v=202610231806';
+import { cargarSheetJS } from './exportar.js?v=202610231806';
+import { esc, fechaHora, clp, aDate, hace } from '../formato.js?v=202610231806';
+import { toast } from '../ui.js?v=202610231806';
+import { agenteAlDia, HORA_AGENTE } from '../logica/agenda-agente.js?v=202610231806';
 
 let preparados = null; // resultado de la vista previa
 let procesando = false;

@@ -1,10 +1,10 @@
 // Motor de negocio (sección 7): unifica compras, etapa, ventana, semáforo, proyección,
 // alertas y acciones. Puro: sin DOM ni Firebase.
 
-import { MESES, normTxt, suma } from '../util.js?v=202610141543';
-import { categoriaTipo } from '../normalizer.js?v=202610141543';
-import { MODALIDADES } from '../parametros-default.js?v=202610141543';
-import { restarHabiles, contarHabiles, finDeMes, lunesDe, hoyISO } from './habiles.js?v=202610141543';
+import { MESES, normTxt, suma } from '../util.js?v=202610231806';
+import { categoriaTipo } from '../normalizer.js?v=202610231806';
+import { MODALIDADES } from '../parametros-default.js?v=202610231806';
+import { restarHabiles, contarHabiles, finDeMes, lunesDe, hoyISO } from './habiles.js?v=202610231806';
 
 export const ETAPAS = {
   0: 'Planificada',

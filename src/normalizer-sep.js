@@ -1,8 +1,8 @@
 // Normalizador del "Seguimiento Gastos SEP" (hoja "Seguimiento SEP").
 // Módulo ES puro. No lee la columna "Etapa actual" (trae #REF!): la etapa se recalcula.
 
-import { normTxt, esVacio, parseMonto, pad3 } from './util.js?v=202610141543';
-import { hojaAMatriz, extraerOCs } from './normalizer.js?v=202610141543';
+import { normTxt, esVacio, parseMonto, pad3 } from './util.js?v=202610231806';
+import { hojaAMatriz, extraerOCs, colALetra } from './normalizer.js?v=202610231806';
 
 export const PATRON_ARCHIVO_SEP = /SEGUIMIENTO.*SEP.*\.xls[xm]?$/i;
 
@@ -53,23 +53,49 @@ export function etapaSEP(item) {
   return 0;
 }
 
+const hojaSEP = (libro) => libro.SheetNames.find((n) => normTxt(n) === 'SEGUIMIENTO SEP')
+  || libro.SheetNames.find((n) => normTxt(n).includes('SEGUIMIENTO'))
+  || libro.SheetNames[0];
+
+/** Fila de encabezados: la que tiene "ITEM" y "PRESUPUESTADO" (fila 4 por defecto). */
+function filaEncabezadoSEP(m) {
+  for (let r = 0; r < Math.min(m.length, 12); r++) {
+    const hs = (m[r] || []).map((v) => normTxt(txt(v)));
+    if (hs.some((h) => h.startsWith('ITEM')) && hs.some((h) => h.includes('PRESUPUESTADO'))) return { fila: r, hallada: true };
+  }
+  // Sin la pareja ITEM + PRESUPUESTADO: la fila con más encabezados reconocidos (solo para el diagnóstico).
+  let mejor = { fila: 3, n: 0 };
+  for (let r = 0; r < Math.min(m.length, 12); r++) {
+    const n = (m[r] || []).filter((v) => campoSEP(normTxt(txt(v)))).length;
+    if (n > mejor.n) mejor = { fila: r, n };
+  }
+  return { fila: mejor.fila, hallada: false };
+}
+
+/**
+ * Solo encabezados (sin datos) del Seguimiento SEP: hojas del libro, fila de encabezados y campo que
+ * reconoce el Visor en cada columna. Para diagnosticar cambios de estructura sin imprimir cifras.
+ */
+export function diagnosticarEncabezadosSEP(libro) {
+  const hoja = hojaSEP(libro);
+  const m = hojaAMatriz(libro.Sheets[hoja]);
+  const { fila, hallada } = filaEncabezadoSEP(m);
+  const columnas = (m[fila] || []).map((v, i) => {
+    const encabezado = txt(v) ? txt(v).replace(/\s+/g, ' ') : '';
+    return { letra: colALetra(i), encabezado, campo: campoSEP(normTxt(encabezado)) };
+  });
+  return { hojas: [...libro.SheetNames], hoja, filaExcel: fila + 1, hallada, columnas };
+}
+
 /**
  * @returns {{ unidad:'SEP', slug:'SEP', items: object[], advertencias: object[], resumen: object }}
  */
 export function normalizarSEP(libro, nombreArchivo, op = {}) {
   const advertencias = [];
   const adv = (codigo, mensaje, extra = {}) => advertencias.push({ codigo, mensaje, ...extra });
-  const nombreHoja = libro.SheetNames.find((n) => normTxt(n) === 'SEGUIMIENTO SEP')
-    || libro.SheetNames.find((n) => normTxt(n).includes('SEGUIMIENTO'))
-    || libro.SheetNames[0];
+  const nombreHoja = hojaSEP(libro);
   const m = hojaAMatriz(libro.Sheets[nombreHoja]);
-
-  // Encabezado: fila con "ITEM" y "PRESUPUESTADO" (fila 4 por defecto).
-  let filaEnc = 3;
-  for (let r = 0; r < Math.min(m.length, 12); r++) {
-    const hs = (m[r] || []).map((v) => normTxt(txt(v)));
-    if (hs.some((h) => h.startsWith('ITEM')) && hs.some((h) => h.includes('PRESUPUESTADO'))) { filaEnc = r; break; }
-  }
+  const filaEnc = filaEncabezadoSEP(m).fila;
   const col = {};
   (m[filaEnc] || []).forEach((v, i) => {
     const c = campoSEP(normTxt(txt(v)));
