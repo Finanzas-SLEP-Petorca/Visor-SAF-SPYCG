@@ -1,9 +1,9 @@
 // Vista por subvención o fuente, con pestaña SEP (formato del Seguimiento SEP y vínculos).
-import { estado, guardarParametros } from '../datos.js?v=202610231809';
-import { agregar, repartirPorFuente, calcularVinculos, ETAPAS } from '../logica/motor.js?v=202610231809';
-import { similitud } from '../util.js?v=202610231809';
-import { esc, clp, pct } from '../formato.js?v=202610231809';
-import { semaforo, etapa, toast, fuenteCifra } from '../ui.js?v=202610231809';
+import { estado, guardarParametros } from '../datos.js?v=202610231813';
+import { agregar, repartirPorFuente, calcularVinculos, ETAPAS } from '../logica/motor.js?v=202610231813';
+import { similitud } from '../util.js?v=202610231813';
+import { esc, clp, pct } from '../formato.js?v=202610231813';
+import { semaforo, etapa, toast, fuenteCifra } from '../ui.js?v=202610231813';
 
 let pestana = 'fuentes';
 let fuenteSel = null;
@@ -65,14 +65,15 @@ function renderSEP(el, ctx) {
     <div class="tarjeta kpi"><div class="etq">Adjudicado</div><div class="val">${clp(tot.adj)}</div><div class="det">${pct(tot.pres ? tot.adj / tot.pres : NaN)} del presupuestado</div></div>
     <div class="tarjeta kpi"><div class="etq">Devengado / pagado</div><div class="val">${clp(tot.dev)}</div><div class="det">Pagado ${clp(tot.pag)}</div></div>
   </div>
-  <div class="tabla-wrap" style="margin-top:1rem"><table class="t"><thead><tr><th>ID</th><th>Subt.</th><th>Ítem</th><th class="num">Presupuestado</th><th>Fase</th><th>Modalidad</th><th>Estado compra</th><th>Formalización</th><th>OC</th><th class="num">Adjudicado</th><th>Estado ejecución</th><th>Verificadores</th><th>Visación UATP</th><th class="num">Devengado</th><th class="num">Pagado</th><th>Vínculo</th><th>Semáforo</th></tr></thead><tbody>
+  <div class="tabla-wrap" style="margin-top:1rem"><table class="t"><thead><tr><th>ID</th><th>Subt.</th><th>Ítem</th><th class="num">Presupuestado</th><th>Fase</th><th>Modalidad</th><th>Estado compra</th><th>Formalización</th><th>OC</th><th class="num">Adjudicado</th><th>Estado ejecución</th><th>Verificadores</th><th>Visación UATP</th><th class="num">Devengado</th><th class="num">Pagado</th><th class="num" title="Presupuestado − adjudicado">Saldo presup.</th><th class="num" title="Devengado − pagado">Por pagar</th><th class="num" title="Pagado / presupuestado">% ejec.</th><th>Vínculo</th><th>Semáforo</th></tr></thead><tbody>
   ${sep.map((c) => { const b = c.base; return `<tr><td><button class="chico" data-abrir="${esc(c.id)}">${esc(c.id)}</button></td><td>${esc(b.subtitulo)}</td><td>${esc(b.item)}</td><td class="num">${clp(b.montoPresupuestado)}</td>
     <td class="small">${esc(FASES[c.et.etapa])}<br><span class="muted">${esc(ETAPAS[c.et.etapa])}</span></td><td>${esc(b.modalidad || '')}</td><td>${esc(b.estadoCompra || '')}</td><td>${esc(b.documentoFormaliza || '')}</td><td>${esc(b.ocTexto || '')}</td>
     <td class="num">${clp(b.montoAdjudicado)}</td><td>${esc(b.estadoEjecucion || '')}</td><td class="small">${esc(b.verificadores || '')}</td><td>${'visacionUATP' in b ? esc(b.visacionUATP || 'Sin visación') : '<span class="muted">—</span>'}</td>
     <td class="num">${clp(b.montoDevengado)}</td><td class="num">${clp(b.montoPagado)}</td>
+    <td class="num">${clp(b.montoPresupuestado - b.montoAdjudicado)}</td><td class="num">${clp(b.montoDevengado - b.montoPagado)}</td><td class="num">${pct(b.montoPresupuestado ? b.montoPagado / b.montoPresupuestado : NaN)}</td>
     <td class="small">${c.vinculo ? `🔗 ${esc(c.vinculo.compraId)} (${esc(c.vinculo.estado)})${admin ? ` <button class="chico" data-descartar="${esc(c.id)}|${esc(c.vinculo.compraId)}">Descartar</button>` : ''}` : '—'}</td><td>${semaforo(c.s.color)}</td></tr>`; }).join('')}
   </tbody></table></div>
-  <p class="small muted">La columna "Etapa actual" de la planilla SEP no se lee (trae #REF!); la fase se recalcula con la lógica del Visor. SEP es solo de seguimiento: no suma en los totales del Servicio, porque sus compras se registran en las planillas de las unidades. El vínculo 🔗 indica en qué compra de una unidad está cada ítem.</p>
+  <p class="small muted">La columna "Etapa actual" de la planilla SEP no se lee; la fase se recalcula con la lógica del Visor. Saldo presupuestario, por pagar y % de ejecución se calculan como en la planilla (presupuestado − adjudicado, devengado − pagado, pagado / presupuestado). SEP es solo de seguimiento: no suma en los totales del Servicio, porque sus compras se registran en las planillas de las unidades. El vínculo 🔗 indica en qué compra de una unidad está cada ítem.</p>
   <div class="tarjeta" style="margin-top:1rem"><h3>Vínculos propuestos por similitud (confirmar o descartar)</h3>
   ${propuestos.length ? `<div class="tabla-wrap libre"><table class="t"><thead><tr><th>Ítem SEP</th><th>Compra de unidad</th><th class="num">Similitud</th><th></th></tr></thead><tbody>
     ${propuestos.slice(0, 40).map((x) => `<tr><td>${esc(x.sepId)} · ${esc(x.sep.detalle)}</td><td>${esc(x.compraId)} · ${esc(x.u.detalle)} (${esc(x.u.unidad)})</td><td class="num">${pct(x.sim)}</td>

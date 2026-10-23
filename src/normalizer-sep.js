@@ -1,14 +1,19 @@
 // Normalizador del "Seguimiento Gastos SEP" (hoja "Seguimiento SEP").
 // Módulo ES puro. No lee la columna "Etapa actual" (trae #REF!): la etapa se recalcula.
 
-import { normTxt, esVacio, parseMonto, pad3 } from './util.js?v=202610231809';
-import { hojaAMatriz, extraerOCs, colALetra } from './normalizer.js?v=202610231809';
+import { normTxt, esVacio, parseMonto, pad3 } from './util.js?v=202610231813';
+import { hojaAMatriz, extraerOCs, colALetra } from './normalizer.js?v=202610231813';
 
 export const PATRON_ARCHIVO_SEP = /SEGUIMIENTO.*SEP.*\.xls[xm]?$/i;
 
 const ENCABEZADOS = [
   // [campo, prueba sobre el encabezado normalizado] — el orden importa
   ['etapaActual', (h) => h.includes('ETAPA')],
+  // Columnas calculadas: antes que los montos, porque sus títulos los nombran
+  // ("Saldo presupuestario (presup. − adjudicado)", "Por pagar (devengado − pagado)", "% ejecución (pagado / presup.)").
+  ['saldo', (h) => h.startsWith('SALDO')],
+  ['porPagar', (h) => h.includes('POR PAGAR')],
+  ['porcentajeEjecucion', (h) => h.includes('%')],
   ['nro', (h) => /^(N|NO|NRO|#)\s*[°º.]?$/.test(h)],
   ['subtitulo', (h) => h.startsWith('SUBT')],
   ['item', (h) => h === 'ITEM' || h.startsWith('ITEM')],
@@ -24,9 +29,6 @@ const ENCABEZADOS = [
   ['visacionUATP', (h) => h.includes('VISACION')],
   ['montoDevengado', (h) => h.includes('DEVENGADO')],
   ['montoPagado', (h) => h.includes('PAGADO') && !h.includes('POR PAGAR')],
-  ['porPagar', (h) => h.includes('POR PAGAR')],
-  ['saldo', (h) => h.startsWith('SALDO')],
-  ['porcentajeEjecucion', (h) => h.includes('%')],
   ['observaciones', (h) => h.startsWith('OBSERVACION')],
 ];
 
@@ -80,9 +82,14 @@ export function diagnosticarEncabezadosSEP(libro) {
   const hoja = hojaSEP(libro);
   const m = hojaAMatriz(libro.Sheets[hoja]);
   const { fila, hallada } = filaEncabezadoSEP(m);
+  const usado = {};
   const columnas = (m[fila] || []).map((v, i) => {
     const encabezado = txt(v) ? txt(v).replace(/\s+/g, ' ') : '';
-    return { letra: colALetra(i), encabezado, campo: campoSEP(normTxt(encabezado)) };
+    const campo = campoSEP(normTxt(encabezado));
+    // Si dos columnas calzan con el mismo campo, el Visor lee solo la primera (igual que normalizarSEP).
+    const repetidoDe = campo && campo in usado ? usado[campo] : null;
+    if (campo && !repetidoDe) usado[campo] = colALetra(i);
+    return { letra: colALetra(i), encabezado, campo: repetidoDe ? null : campo, repetidoDe, campoRepetido: repetidoDe ? campo : null };
   });
   return { hojas: [...libro.SheetNames], hoja, filaExcel: fila + 1, hallada, columnas };
 }

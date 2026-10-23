@@ -53,12 +53,12 @@ export const ENCABEZADOS_SEP = ['N°', 'Subt.', 'Ítem', 'Monto presupuestado', 
   'Estado ejecución', 'Verificadores de ejecución', 'Monto devengado', 'Monto pagado', 'Saldo', 'Por pagar',
   '% ejecución', 'Etapa actual', 'Observaciones'];
 
-export function libroSEP(items, { refEnEtapa = [] } = {}) {
-  const aoa = [['Seguimiento Gastos SEP'], [], [], ENCABEZADOS_SEP];
+export function libroSEP(items, { refEnEtapa = [], encabezados = ENCABEZADOS_SEP, calculadas = [0, 0, 0] } = {}) {
+  const aoa = [['Seguimiento Gastos SEP'], [], [], encabezados];
   items.forEach((it, i) => aoa.push([
     i + 1, it.subt ?? '22', it.item, it.monto ?? 0, it.modalidad ?? null, it.idmp ?? null, it.estadoCompra ?? 'Sin iniciar',
     null, it.oc ?? null, it.adjudicado ?? 0, it.estadoEjecucion ?? 'Sin iniciar', null, it.devengado ?? 0, it.pagado ?? 0,
-    0, 0, 0, 'Identificación', it.obs ?? null,
+    ...calculadas, 'Identificación', it.obs ?? null,
   ]));
   aoa.push(['TOTAL', null, null, items.reduce((s, x) => s + (x.monto || 0), 0)]);
   const ws = XLSX.utils.aoa_to_sheet(aoa);

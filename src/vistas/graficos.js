@@ -1,6 +1,6 @@
 // Gráficos SVG livianos (sin librerías). Un solo eje Y, líneas de 2px, tooltip por mes,
 // etiquetas directas al final de cada serie, leyenda y tabla alternativa.
-import { esc, clp, clpCorto } from '../formato.js?v=202610231809';
+import { esc, clp, clpCorto } from '../formato.js?v=202610231813';
 
 function escala(max) {
   if (max <= 0) return { tope: 1, paso: 1 };
