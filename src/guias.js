@@ -1,6 +1,6 @@
 // Guía de uso de cada pestaña: qué muestra, cómo leerla y qué puede ingresar cada rol.
-import { esc } from './formato.js?v=202610231806';
-import { ROLES } from './parametros-default.js?v=202610231806';
+import { esc } from './formato.js?v=202610231809';
+import { ROLES } from './parametros-default.js?v=202610231809';
 
 const G = {
   resumen: {

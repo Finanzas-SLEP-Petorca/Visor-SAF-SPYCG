@@ -1,8 +1,8 @@
 // Normalizador del "Seguimiento Gastos SEP" (hoja "Seguimiento SEP").
 // Módulo ES puro. No lee la columna "Etapa actual" (trae #REF!): la etapa se recalcula.
 
-import { normTxt, esVacio, parseMonto, pad3 } from './util.js?v=202610231806';
-import { hojaAMatriz, extraerOCs, colALetra } from './normalizer.js?v=202610231806';
+import { normTxt, esVacio, parseMonto, pad3 } from './util.js?v=202610231809';
+import { hojaAMatriz, extraerOCs, colALetra } from './normalizer.js?v=202610231809';
 
 export const PATRON_ARCHIVO_SEP = /SEGUIMIENTO.*SEP.*\.xls[xm]?$/i;
 

@@ -244,3 +244,26 @@ test('estructura con montos por fuente (CDP + MONTO SUBV ...): se leen y el rest
   assert.equal(cuenta(r, 'ENCABEZADO_DISTINTO'), 0);
   assert.equal(cuenta(r, 'DESGLOSE_NO_CUADRA'), 0);
 });
+
+test('columnas nuevas: MONTO JUNJI y TIPO DE ESTABLECIMIENTO (planilla de INFRAESTRUCTURA)', () => {
+  const NUEVAS = ['CDP', 'MONTO APORTE FISCAL', 'MONTO JUNJI', 'MONTO SUBV GRAL', 'MONTO SUBV SEP', 'MONTO SUBV PIE',
+    'MONTO SUBV PRORETENCION', 'MONTO SUBV MANTENCION', 'MONTO FAEP'];
+  const enc = [...ENCABEZADOS_UNIDAD];
+  enc[0] = null;
+  enc.splice(8, 0, ...NUEVAS);
+  enc.splice(5, 0, 'TIPO DE ESTABLECIMIENTO'); // antes de DETALLE COMPRA
+  const conCols = (tipoEst, vals, p) => { const f = fila(p); f.splice(8, 0, ...vals); f.splice(5, 0, tipoEst); return f; };
+  const r = normalizarPlanilla(libroUnidad('NUEVE', [
+    conCols('Jardín infantil', [null, 0, 700000, 0, 0, 0, 0, 0, 300000], { nro: 1, estado: 'EN PROCESO', meses: M({ 10: 50 }) }),
+  ], { encabezados: enc }), 'ESTATUS DEVENGOS COMPRAS NUEVE 2026.xlsx');
+  const [a] = r.filas;
+  assert.equal(a.tipoEstablecimiento, 'Jardín infantil');
+  assert.equal(a.detalle, 'Compra de prueba');
+  assert.deepEqual(a.montosFuente, { 'JUNJI/VTF': 700000, FAEP: 300000 });
+  assert.equal(a.estadoUnidad, 'EN PROCESO');
+  assert.equal(a.desglose.NOV, 50);
+  assert.equal(cuenta(r, 'FUENTES_NO_CUADRAN'), 0);
+  // Sin la columna, el campo no aparece (no cambia las otras planillas)
+  const sin = normalizarPlanilla(libroUnidad('DIEZ', [fila({ nro: 1 })]), 'ESTATUS DEVENGOS COMPRAS DIEZ 2026.xlsx');
+  assert.ok(!('tipoEstablecimiento' in sin.filas[0]));
+});

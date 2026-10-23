@@ -3,7 +3,7 @@
 // ya leído (objeto de SheetJS: { SheetNames, Sheets }) y el nombre del archivo.
 // Lo reutilizan el navegador, el agente local y el conector en la nube.
 
-import { MESES, MESES_LARGOS, normTxt, esVacio, parseMonto, slugUnidad, pad3 } from './util.js?v=202610231806';
+import { MESES, MESES_LARGOS, normTxt, esVacio, parseMonto, slugUnidad, pad3 } from './util.js?v=202610231809';
 
 export const VERSION_NORMALIZADOR = 2;
 
@@ -72,6 +72,7 @@ function campoDeEncabezado(h) {
   }
   if (h === 'CDP' || /^N\s*[°ºO]?\s*CDP$/.test(h)) return 'cdp';
   if (h === 'LINEA') return 'linea';
+  if (h.includes('ESTABLECIMIENTO')) return 'tipoEstablecimiento';
   if (h.includes('SUBVENCION') || h.includes('FINANCIAMIENTO')) return 'subvencion';
   if (/^(N|NO|NRO|NUMERO|#)\s*[°º.]?$/.test(h) || /^N\s*[°º]$/.test(h)) return 'nro';
   if (h.includes('PENDIENTE')) return 'pendienteOT';
@@ -535,6 +536,8 @@ export function normalizarPlanilla(libro, nombreArchivo, op = {}) {
       fuentesPlanilla,
       cdp: col.cdp !== undefined ? texto('cdp') : null,
       linea: col.linea !== undefined ? texto('linea') : null,
+      // Solo si la planilla trae la columna (hoy, INFRAESTRUCTURA).
+      ...(col.tipoEstablecimiento !== undefined ? { tipoEstablecimiento: texto('tipoEstablecimiento') } : {}),
       estadoInferido: inferirEstado(obsUnidad),
       seguimientos: separarSeguimientos(obsUnidad),
       advertencias: [...new Set(codigos)],

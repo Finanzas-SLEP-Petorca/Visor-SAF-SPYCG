@@ -1,11 +1,11 @@
 // Exportaciones: Excel (SheetJS desde su CDN oficial), CSV y preparación de impresión a PDF.
 // Todas incluyen fuente, fecha de corte y usuario que exportó.
-import { estado } from '../datos.js?v=202610231806';
-import { ETAPAS, repartirPorFuente } from '../logica/motor.js?v=202610231806';
-import { MESES } from '../util.js?v=202610231806';
-import { ROLES_OBS, ROLES } from '../parametros-default.js?v=202610231806';
-import { fecha, fechaHora, esc } from '../formato.js?v=202610231806';
-import { descargar } from '../ui.js?v=202610231806';
+import { estado } from '../datos.js?v=202610231809';
+import { ETAPAS, repartirPorFuente } from '../logica/motor.js?v=202610231809';
+import { MESES } from '../util.js?v=202610231809';
+import { ROLES_OBS, ROLES } from '../parametros-default.js?v=202610231809';
+import { fecha, fechaHora, esc } from '../formato.js?v=202610231809';
+import { descargar } from '../ui.js?v=202610231809';
 
 const URL_SHEETJS = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs';
 let XLSX = null;
@@ -79,7 +79,7 @@ const valorTexto = (v) => {
 const ETIQUETAS_BASE = {
   programa: 'Programa', subtitulo: 'Subtítulo', asignacion: 'Asignación', adminContrato: 'Administrador contrato',
   detalle: 'Detalle', proveedor: 'Proveedor', temporalidad: 'Temporalidad', montoPAC: 'Monto PAC', montoOC: 'Monto OC',
-  ocTexto: 'N° OC (texto original)', idMercadoPublico: 'ID Mercado Público / cotización', tipoCompra: 'Tipo de compra', subvencion: 'Subvención', cdp: 'CDP (planilla)', linea: 'Línea',
+  ocTexto: 'N° OC (texto original)', idMercadoPublico: 'ID Mercado Público / cotización', tipoCompra: 'Tipo de compra', subvencion: 'Subvención', cdp: 'CDP (planilla)', linea: 'Línea', tipoEstablecimiento: 'Tipo de establecimiento',
   tipoCompraInferido: 'Tipo inferido de la OC', valorOT: 'Valor OT', avanceOT: '% avance OT', valorRecepcion: 'Recepción conforme',
   devengadoPlanilla: 'Facturado = devengado', pendienteOT: 'Pendiente OT', totalDesglose: 'Total desglose', obsUnidad: 'Observaciones de la unidad',
   estadoInferido: 'Estado inferido', item: 'Ítem', montoPresupuestado: 'Monto presupuestado', modalidad: 'Modalidad',
